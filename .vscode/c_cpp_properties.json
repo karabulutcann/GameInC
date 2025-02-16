@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "windows",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/test/**",
+                "${workspaceFolder}/include"
+            ],
+            "defines": [
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,38 @@
+{
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "windows",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/",
+            "environment": [],
+            "console":"integratedTerminal",
+        },
+        {
+            "name": "playground",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/playground/bin/playground.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/",
+            "environment": [],
+            "console":"integratedTerminal",
+        },
+        {
+            "name": "linux",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/",
+            "environment": [],
+        }
+    ]
+}

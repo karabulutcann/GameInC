@@ -1,0 +1,31 @@
+{
+    "files.associations": {
+        "glfw3.h": "c",
+        "gl.h": "c",
+        "glad.h": "c",
+        "core.h": "c",
+        "stdarg.h": "c",
+        "stdlib.h": "c",
+        "file.h": "c",
+        "stdio.h": "c",
+        "malloc.h": "c",
+        "result.h": "c",
+        "log.h": "c",
+        "math.h": "c",
+        "image.h": "c",
+        "nuklear.h": "c",
+        "shader.h": "c",
+        "string.h": "c",
+        "safe_strings.h": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "xutility": "c",
+        "window.h": "c",
+        "stb_image.h": "c",
+        "xmemory": "c",
+        "world.h": "c",
+        "cglm.h": "c",
+        "camera.h": "c"
+    },
+    "CodeGPT.apiKey": "Ollama"
+}
