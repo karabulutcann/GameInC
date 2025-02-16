@@ -2,7 +2,8 @@
 #include "core/core.h"
 #include "chunk.h"
 
-#define WORLD_SIZE_X 15
+// 10 dan fazla iken zorlaniyo
+#define WORLD_SIZE_X 20
 
 struct World
 {

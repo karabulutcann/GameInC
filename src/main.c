@@ -69,6 +69,8 @@ int main()
             mat4 model = GLM_MAT4_IDENTITY_INIT;
             glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f,chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
             shaderSetUniformMat4(&chunkShader, "model", model);
+            //TODO bunu burda yapma vertex buffer object baglanmadan calismiyor 
+            //glNamedBuffer foksiyonlarini kullan
             glBindVertexArray(chunkShader.vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);

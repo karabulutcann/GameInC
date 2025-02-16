@@ -72,7 +72,9 @@ void worldCreate(struct World *dest)
     dest->chunkTable = chunkTableCreate(WORLD_SIZE_X * WORLD_SIZE_X);
     for (int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
     {
-        chunkCreate((i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, &dest->chunkTable[i]);
+        struct Chunk tmpChunk = {0};
+        chunkCreate((i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, &tmpChunk);
+        chunkTableInsert(dest->chunkTable, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, tmpChunk);
         INFO("Created chunk at %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
     }
     for(int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++){
@@ -187,6 +189,10 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
     struct Chunk* chunk = chunkTableGet(self->chunkTable, chunkPos);
     count_t totalWritten = 0;
     chunk->mesh = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(float) * CUBE_VERTEX_SIZE * 36);
+    if(chunk->mesh == NULL){
+        ERROR("Failed to allocate memory for chunk mesh!\n");
+        exit(1);
+    }
     for (int i = 0; i < CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y; i++)
     {
         if (chunk->blockTypeArr[i] != AIR)

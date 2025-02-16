@@ -27,7 +27,8 @@
         "cglm.h": "c",
         "camera.h": "c",
         "engine.h": "c",
-        "input.h": "c"
+        "input.h": "c",
+        "rapidhash.h": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

@@ -72,9 +72,11 @@ void chunkDestroy(struct Chunk chunk)
     }
 }
 
+#include <rapidhash.h>
+
 u4 hashPosition(i4 position[2])
 {
-    return (u4)(position[0] | ~position[1]);
+    return (u4)rapidhash(position, sizeof(i4) * 2);
 }
 
 struct ChunkTableMeta
@@ -113,7 +115,7 @@ void chunkTableInsert(ChunkTable table, i4 position[2], struct Chunk chunk)
     printf("Key is %ld\n", key);
     struct Chunk c = {0};
     c = table[(key) % meta->length];
-    u1 i = 0;
+    index_t i = 0;
     while (c.blockTypeArr != NULL && i < meta->length)
     {
         i++;
@@ -135,7 +137,7 @@ void chunkTableRemove(ChunkTable table, i4 position[2])
     struct ChunkTableMeta *meta = chunkTableGetMeta(table);
     u4 key = hashPosition(position) % meta->length;
     struct Chunk c = {0};
-    u1 i = 0;
+    index_t i = 0;
     while (i < meta->length)
     {
         c = table[(key + i) % meta->length];
@@ -163,7 +165,7 @@ struct Chunk* chunkTableGet(ChunkTable table, i4 position[2])
     u4 key = hashPosition(position) % meta->length;
 
     struct Chunk *c = NULL;
-    u1 i = 0;
+    index_t i = 0;
     while (i < meta->length)
     {
         c = table + (key + i) % meta->length;

@@ -57,3 +57,6 @@ typedef u8 size;
 // 8 btye / 64 bit count value
 // use only for representing count of values
 typedef u8 count_t;
+
+typedef u8 index_t;
+
