@@ -4,14 +4,18 @@
 // TODO avoid using string.h
 #include "string.h"
 #include <stdlib.h>
+
 // TODO change this to handle multiple windows
-static struct EngineWindow *staticWindow;
+static struct Window *staticWindow;
+
+static f4 mousePosX = 0.0f;
+static f4 mousePosY = 0.0f;
 
 // TODO move input logic into its on file
-static struct InputKeyState staticKeyState;
 
 // always use else if to avoid multiple windowing libraries
 #ifdef USE_GLFW
+
 // TODO dont use calbacks instead use a error getter and use it in mErr
 void glfwErrorCallback(int error, const char *description)
 {
@@ -27,19 +31,20 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 void mouseCallbackGLFW(GLFWwindow *window, double xpos, double ypos)
 {
-    staticWindow->mouseEventCallbackF(xpos, ypos);
+    mousePosX = xpos;
+    mousePosY = ypos;
 }
 #endif
 
-struct Result windowCreate(int width, int height, const char *title, mouseEventCallback mouseCallbackF, struct EngineWindow *windowDest)
+struct Result windowCreate(int width, int height, const char *title, struct Window *dest)
 {
-    staticWindow = windowDest;
-    windowDest->width = width;
-    windowDest->height = height;
-    windowDest->title = (char *)malloc(strlen(title) + 1);
-    windowDest->mouseEventCallbackF = mouseCallbackF;
-    windowDest->isMouseLocked = FALSE;
-    strcpy(windowDest->title, title);
+    staticWindow = dest;
+    dest->width = width;
+    dest->height = height;
+    dest->title = (char *)malloc(strlen(title) + 1);
+    dest->isMouseLocked = FALSE;
+    strcpy(dest->title, title);
+    
 #ifdef USE_GLFW
     glfwSetErrorCallback(glfwErrorCallback);
 
@@ -53,19 +58,20 @@ struct Result windowCreate(int width, int height, const char *title, mouseEventC
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     GLFWwindow *test = glfwCreateWindow(width, height, title, NULL, NULL);
-    windowDest->windowHandle = test;
-    if (windowDest->windowHandle == NULL)
+    dest->windowHandle = test;
+    if (dest->windowHandle == NULL)
     {
         // Dont forget to terminate glfw and free the title before using mErr
         return mErr("Failed to create GLFW window");
     }
-    DEBUG("windows is after %p", windowDest->windowHandle);
-    glfwMakeContextCurrent(windowDest->windowHandle);
-    glfwSetFramebufferSizeCallback(windowDest->windowHandle, framebuffer_size_callback);
-    windowToggleMouseLock(windowDest);
-    glfwSetCursorPosCallback(windowDest->windowHandle, mouseCallbackGLFW);
+    DEBUG("windows is after %p", dest->windowHandle);
 
-    DEBUG("w close %d", glfwWindowShouldClose(windowDest->windowHandle));
+    glfwMakeContextCurrent(dest->windowHandle);
+    glfwSetFramebufferSizeCallback(dest->windowHandle, framebuffer_size_callback);
+    windowToggleMouseLock(dest);
+    glfwSetCursorPosCallback(dest->windowHandle, mouseCallbackGLFW);
+
+    DEBUG("w close %d", glfwWindowShouldClose(dest->windowHandle));
 
 #elif defined(USE_SDL)
     ERROR("SDL not implemented yet");
@@ -80,7 +86,7 @@ struct Result windowCreate(int width, int height, const char *title, mouseEventC
     return ok();
 }
 
-void windowToggleMouseLock(struct EngineWindow *window)
+void windowToggleMouseLock(struct Window *window)
 {
     window->isMouseLocked = !window->isMouseLocked;
 #ifdef USE_GLFW
@@ -89,14 +95,19 @@ void windowToggleMouseLock(struct EngineWindow *window)
 }
 
 // TODO change this return value
-Bool windowShouldClose(struct EngineWindow *window)
+Bool windowShouldClose(struct Window *window)
 {
 #ifdef USE_GLFW
     return glfwWindowShouldClose(window->windowHandle);
 #endif
 }
 
-struct Result windowHandleEvents(struct EngineWindow *window)
+void windowSetShouldClose(struct Window *window, Bool shouldClose)
+{
+    glfwSetWindowShouldClose(window->windowHandle, shouldClose);
+}
+
+struct Result windowUpdateEvents(struct Window *window)
 {
 #ifdef USE_GLFW
     glfwPollEvents();
@@ -104,7 +115,7 @@ struct Result windowHandleEvents(struct EngineWindow *window)
     return ok();
 }
 
-Bool windowGetKey(struct EngineWindow *window, enum InputKey key)
+Bool windowGetKey(struct Window *window, enum InputKey key)
 {
 #ifdef USE_GLFW
     switch (key)
@@ -129,161 +140,31 @@ Bool windowGetKey(struct EngineWindow *window, enum InputKey key)
 #endif
 }
 
-// TODO make a macro to create a switch case for every key
-Bool windowGetKeyPressedOnce(struct EngineWindow *window, enum InputKey key)
-{
-    switch (key)
-    {
-    case KEY_W:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keyW)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keyW = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keyW = FALSE;
-            return FALSE;
-        }
-        break;
-    case KEY_S:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keyS)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keyS = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keyS = FALSE;
-            return FALSE;
-        }
-        break;
-    case KEY_A:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keyA)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keyA = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keyA = FALSE;
-            return FALSE;
-        }
-        break;
-    case KEY_D:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keyD)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keyD = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keyD = FALSE;
-            return FALSE;
-        }
-        break;
-    case KEY_SPACE:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keySpace)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keySpace = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keySpace = FALSE;
-            return FALSE;
-        }
-        break;
-    case KEY_ESC:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keyESC)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keyESC = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keyESC = FALSE;
-            return FALSE;
-        }
-        break;
-    case KEY_LEFT_SHIFT:
-        if (windowGetKey(window, key))
-        {
-            if (staticKeyState.keyLeftShift)
-            {
-                return FALSE;
-            }
-            else
-            {
-                staticKeyState.keyLeftShift = TRUE;
-                return TRUE;
-            }
-        }
-        else
-        {
-            staticKeyState.keyLeftShift = FALSE;
-            return FALSE;
-        }
-        break;
-    default:
-        return FALSE;
-    }
+f4 windowGetMouseX(struct Window* window){
+    return mousePosX;
 }
 
-struct Result windowSwapBuffers(struct EngineWindow *window)
+f4 windowGetMouseY(struct Window* window){
+    return mousePosY;
+}
+
+// TODO make a macro to create a switch case for every key
+struct Result windowSwapBuffers(struct Window *window)
 {
 #ifdef USE_GLFW
     glfwSwapBuffers(window->windowHandle);
 #endif
     return ok();
 }
+f4 windowGetDeltaTime(struct Window* window){
+    return (f4)glfwGetTime();
+}
 
-struct Result windowDestroy(struct EngineWindow *window)
+struct Result windowDestroy(struct Window *window)
 {
     free(window->title);
 #ifdef USE_GLFW
     glfwTerminate();
 #endif
 }
+

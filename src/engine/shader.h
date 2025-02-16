@@ -1,26 +1,40 @@
 #pragma once
 #include "core/core.h"
+#include "texture.h"
 
 struct Shader{
-    unsigned int ID;
+    u4 id;
+    struct Texture textures[16];
+    count_t textureCount;
+    const char* vertexPath;
+    const char* fragmentPath;
+    u4 vertexArrayObject;
+    struct Mesh* meshes;
+    count_t meshCount;
 };
 
-struct Shader shaderCreate(const char *vertexPath, const char *fragmentPath,const char *geometryPath);
+struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, const char *geometryPath, struct Shader *dest);
 
 void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shaderType);
 
-void shaderUse(struct Shader shader);
 
-void shaderSetUniformBool(struct Shader shader,const char* name,Bool value);
+// samplerName cannot be "texture" because it is a reserved word
+void shaderCreateTexture(struct Shader *self, const char *imagePath, const char *samplerName);
 
-void shaderSetUniformInt(struct Shader shader,const char* name,int value);
+void shaderUse(struct Shader* self);
 
-void shaderSetUniformFloat(struct Shader shader,const char* name,float value);
+void shaderPrepareForDraw(struct Shader *self);
 
-void shaderSetUniformVec3(struct Shader shader,const char* name,vec3 value);
+void shaderSetUniformBool(struct Shader* self,const char* name,Bool value);
 
-void shaderSetUniformVec3Arr(struct Shader shader, const char *name,size_t arrSize,vec3 value);
+void shaderSetUniformInt(struct Shader* self,const char* name,int value);
 
-void shaderSetUniformMat4(struct Shader shader, const char *name, mat4 value);
+void shaderSetUniformFloat(struct Shader* self,const char* name,float value);
 
-void shaderDestroy(struct Shader shader);
+void shaderSetUniformVec3(struct Shader* self,const char* name,vec3 value);
+
+void shaderSetUniformVec3Arr(struct Shader* self, const char *name,size_t arrSize,vec3 value);
+
+void shaderSetUniformMat4(struct Shader* self, const char *name, mat4 value);
+
+void shaderDestroy(struct Shader* self);

@@ -2,8 +2,6 @@
 #include "safe_strings.h"
 #include <glad/glad.h>
 
-#define USE_GLFW
-
 #define TRUE 1
 #define FALSE 0
 

@@ -25,7 +25,9 @@
         "xmemory": "c",
         "world.h": "c",
         "cglm.h": "c",
-        "camera.h": "c"
+        "camera.h": "c",
+        "engine.h": "c",
+        "input.h": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

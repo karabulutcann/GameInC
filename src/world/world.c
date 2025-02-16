@@ -1,5 +1,6 @@
 #include "world.h"
-#include "memory.h"
+#include "core/log.h"
+#include <memory.h>
 
 #define size 0.2f
 #define cubeSize 0.4f
@@ -66,17 +67,17 @@ enum Face
     TOP
 };
 
-
-
 void worldCreate(struct World *dest)
 {
     dest->chunkTable = chunkTableCreate(WORLD_SIZE_X * WORLD_SIZE_X);
     for (int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
     {
-        chunkCreate((u2[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, &dest->chunkTable[i]);
+        chunkCreate((i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, &dest->chunkTable[i]);
+        INFO("Created chunk at %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
     }
     for(int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++){
-        worldGenerateChunkMesh(dest, (u2[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
+        worldGenerateChunkMesh(dest, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
+        INFO("Generated chunk mesh at %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
     }
 }
 
@@ -204,4 +205,11 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
         }
     }
     chunk->vertexCount = totalWritten;
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, chunk->vertexCount * sizeof(float), chunk->mesh, GL_STATIC_DRAW);
+}
+
+void worldDestroy(struct World *self)
+{
+    chunkTableDestroy(self->chunkTable);
 }

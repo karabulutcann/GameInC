@@ -1,11 +1,7 @@
 #version 330 core
 out vec4 FragColor;
 
-uniform sampler2D image;
-uniform sampler2D normalMap;
-
-uniform sampler2D cobblestoneT;
-uniform sampler2D cobblestoneN;
+uniform sampler2D textureS;
 
 in vec3 Normal;  
 in vec3 FragPos;  
@@ -52,5 +48,5 @@ void main()
     //     //TODO air blocklari baska yerde sil burda yapmak performsi ektiliyo
     //     discard;
     // }
-    FragColor = texture(image,TexCoords) * vec4(result, 1.0);
+    FragColor = texture(textureS,TexCoords) * vec4(result, 1.0);
 } 

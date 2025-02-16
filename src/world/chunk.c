@@ -59,12 +59,17 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
             }
         }
     }
+    glGenBuffers(1,&dest->vertexBufferObject);
 }
 
 void chunkDestroy(struct Chunk chunk)
 {
-    free(chunk.blockTypeArr);
-    free(chunk.mesh);
+    if(chunk.blockTypeArr != NULL){
+        free(chunk.blockTypeArr);
+    }
+    if(chunk.mesh != NULL){
+        free(chunk.mesh);
+    }
 }
 
 u4 hashPosition(i4 position[2])
@@ -78,7 +83,7 @@ struct ChunkTableMeta
     u4 count;
 };
 
-typedef struct Chunk *ChunkTable;
+typedef struct Chunk* ChunkTable;
 
 ChunkTable chunkTableCreate(u4 length)
 {
@@ -170,7 +175,6 @@ struct Chunk* chunkTableGet(ChunkTable table, i4 position[2])
         }
         i++;
     }
-    INFO("Cant get chunk at position %d %d\n", position[0], position[1]);
     return NULL;
 }
 
@@ -181,5 +185,5 @@ void chunkTableDestroy(ChunkTable table)
     {
         chunkDestroy(table[i]);
     }
-    free(table);
+    free(meta);
 }

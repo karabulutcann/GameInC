@@ -19,37 +19,42 @@ const char *defaultFragmentShader = "#version 330 core\n"
                                     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
                                     "}\n\0";
 
-struct Shader shaderCreate(const char *vertexPath, const char *fragmentPath, const char *geometryPath)
+struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, const char *geometryPath, struct Shader *dest)
 {
-    struct Shader shader = {0};
+    *dest = (struct Shader){0};
     int success;
 
-    shader.ID = glCreateProgram();
-    shaderCompileAndAttach(shader.ID, vertexPath, GL_VERTEX_SHADER);
-    shaderCompileAndAttach(shader.ID, fragmentPath, GL_FRAGMENT_SHADER);
+    dest->id = glCreateProgram();
+    shaderCompileAndAttach(dest->id, vertexPath, GL_VERTEX_SHADER);
+    shaderCompileAndAttach(dest->id, fragmentPath, GL_FRAGMENT_SHADER);
+
     if (geometryPath != NULL)
     {
-        shaderCompileAndAttach(shader.ID, geometryPath, GL_GEOMETRY_SHADER);
+        shaderCompileAndAttach(dest->id, geometryPath, GL_GEOMETRY_SHADER);
     }
-    glLinkProgram(shader.ID);
 
-    glGetProgramiv(shader.ID, GL_LINK_STATUS, &success);
+    glLinkProgram(dest->id);
+
+    glGetProgramiv(dest->id, GL_LINK_STATUS, &success);
     if (!success)
     {
         char infoLog[512];
-        glGetProgramInfoLog(shader.ID, 512, NULL, infoLog);
+        glGetProgramInfoLog(dest->id, 512, NULL, infoLog);
         ERROR("Shader linking failed: %s\n", infoLog);
         exit(1);
     }
+    
+    glGenVertexArrays(1, &dest->vertexArrayObject);
+    glBindVertexArray(dest->vertexArrayObject);
 
-    return shader;
+    return ok();
 }
 
 void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shaderType)
 {
     char *shaderCode;
     int success;
-    const char * shaderTypeName = NULL;
+    const char *shaderTypeName = NULL;
 
     switch (shaderType)
     {
@@ -78,7 +83,7 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
     {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        ERROR("%s shader compilation failed: %s\n ",shaderTypeName,infoLog);
+        ERROR("%s shader compilation failed: %s\n ", shaderTypeName, infoLog);
         exit(1);
     }
 
@@ -88,39 +93,63 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
     free(shaderCode);
 }
 
-void shaderUse(struct Shader shader)
+typedef void (*shaderPrepareCallback)(struct Shader* self);
+
+void shaderPrepareForDraw(struct Shader *self)
 {
-    glUseProgram(shader.ID);
+    glUseProgram(self->id);
+    for(int i = 0; i < self->textureCount; i++){
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, self->textures[i].id);
+    }
 }
 
-void shaderSetUniformBool(struct Shader shader, const char *name, Bool value)
+void shaderCreateTexture(struct Shader *self, const char *imagePath, const char *samplerName)
 {
-    glUniform1i(glGetUniformLocation(shader.ID, name), value);
+    textureCreate(imagePath, samplerName, &self->textures[self->textureCount]);
+    self->textureCount++;
+
+    shaderUse(self);
+    shaderSetUniformInt(self,samplerName, (i4)(self->textureCount - 1));
 }
 
-void shaderSetUniformInt(struct Shader shader, const char *name, int value)
+void shaderUse(struct Shader *self)
 {
-    glUniform1i(glGetUniformLocation(shader.ID, name), value);
+    glUseProgram(self->id);
 }
 
-void shaderSetUniformFloat(struct Shader shader, const char *name, float value)
+void shaderSetUniformBool(struct Shader *self, const char *name, Bool value)
 {
-    glUniform1f(glGetUniformLocation(shader.ID, name), value);
-}
-void shaderSetUniformVec3(struct Shader shader, const char *name, vec3 value)
-{
-    glUniform3fv(glGetUniformLocation(shader.ID, name), 1, value);
-}
-void shaderSetUniformVec3Arr(struct Shader shader, const char *name,size_t arrSize,vec3 value)
-{
-    glUniform3fv(glGetUniformLocation(shader.ID, name), arrSize, value);
-}
-void shaderSetUniformMat4(struct Shader shader, const char *name, mat4 value)
-{
-    glUniformMatrix4fv(glGetUniformLocation(shader.ID, name), 1, GL_FALSE, &value[0][0]);
+    glUniform1i(glGetUniformLocation(self->id, name), value);
 }
 
-void shaderDestroy(struct Shader shader)
+void shaderSetUniformInt(struct Shader *self, const char *name, int value)
 {
-    glDeleteProgram(shader.ID);
+    glUniform1i(glGetUniformLocation(self->id, name), value);
+}
+
+void shaderSetUniformFloat(struct Shader *self, const char *name, float value)
+{
+    glUniform1f(glGetUniformLocation(self->id, name), value);
+}
+
+void shaderSetUniformVec3(struct Shader *self, const char *name, vec3 value)
+{
+    glUniform3fv(glGetUniformLocation(self->id, name), 1, value);
+}
+
+void shaderSetUniformVec3Arr(struct Shader *self, const char *name, size_t arrSize, vec3 value)
+{
+    glUniform3fv(glGetUniformLocation(self->id, name), arrSize, value);
+}
+
+void shaderSetUniformMat4(struct Shader *self, const char *name, mat4 value)
+{
+    glUniformMatrix4fv(glGetUniformLocation(self->id, name), 1, GL_FALSE, &value[0][0]);
+}
+
+void shaderDestroy(struct Shader *self)
+{
+    glDeleteVertexArrays(1, &self->vertexArrayObject);
+    glDeleteProgram(self->id);
 }

@@ -6,8 +6,6 @@
 // Doğrudan kullanma bunun yerine format() kullan.
 // DisposableString kullanıldıktan sonra free()lemiyor kullanma
 // TODO son harfi yazdirmiyor
-#ifndef FORMATTER
-#define FORMATTER
 int _formatter(char *buffer, const size_t size, const char *fmt, va_list args)
 {
     if (fmt == NULL)
@@ -164,4 +162,3 @@ struct DisposableString format(const char *fmt, ...)
 
     return (struct DisposableString){.string = buffer}; // Formatting error
 }
-#endif
