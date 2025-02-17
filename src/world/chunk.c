@@ -25,11 +25,12 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     // Create a FastNoiseLite state
     fnl_state noise_state = fnlCreateState();
     noise_state.seed = 12345;                  // You can change the seed for different terrain generation
-    noise_state.frequency = 0.02f;             // Adjust frequency for terrain detail
+    noise_state.frequency = 0.009f;             // Adjust frequency for terrain detail
     noise_state.noise_type = FNL_NOISE_PERLIN; // You can experiment with different noise types
     noise_state.fractal_type = FNL_FRACTAL_FBM;
-    noise_state.octaves = 8;
-    noise_state.gain = 0.5f;
+    // 4 den sonrası değişiklik yaratmıyo
+    noise_state.octaves = 4;
+    noise_state.gain = 0.4f;
 
     for (int x = 0; x < CHUNK_SIZE_X; x++)
     {
@@ -42,7 +43,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 
             // Sample noise to determine terrain height
             float height_sample = fnlGetNoise2D(&noise_state, world_x, world_z);
-            int terrain_height = 5 + (int)((height_sample) * 20);
+            int terrain_height = 10 + (int)((height_sample) * 50);
             for (int y = 0; y < CHUNK_SIZE_Y; y++)
             {
                 unsigned int block_id = 0; // Default: air
@@ -50,8 +51,13 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
                 if (y <= terrain_height)
                 {
                     block_id = 2; // Stone
-                    if (y > terrain_height - 3)
+                    if (y > terrain_height - 3){
                         block_id = 1; // Dirt near surface
+                        if(y > terrain_height - 1){
+                            block_id = 3; // Grass
+                        }
+                    }
+                        
                 }
 
                 // Store the block ID in the chunk array.
@@ -112,7 +118,6 @@ void chunkTableInsert(ChunkTable table, i4 position[2], struct Chunk chunk)
         return;
     }
     u4 key = hashPosition(position) % meta->length;
-    printf("Key is %ld\n", key);
     struct Chunk c = {0};
     c = table[(key) % meta->length];
     index_t i = 0;

@@ -29,7 +29,7 @@ int main()
 
     struct Shader chunkShader = {0};
     shaderCreate("shaders/vertex.glsl", "shaders/fragment.glsl", NULL, &chunkShader);
-    shaderCreateTexture(&chunkShader, "assets/textures/dirt.png", "textureS");
+    shaderCreateTexture(&chunkShader, "assets/textures/texture_atlas.png", "textureAtlas");
 
     struct World world = {0};
     worldCreate(&world);

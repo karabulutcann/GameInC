@@ -3,7 +3,7 @@
 #include <stb_image.h>
 
 struct Result engineCreate(struct Engine * dest){
-    windowCreate(800, 600, "ENGINE", &dest->window);
+    windowCreate(1280, 720, "ENGINE", &dest->window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         return mErr("Failed to initialize GLAD");

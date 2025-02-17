@@ -4,6 +4,7 @@
 
 #define size 0.2f
 #define cubeSize 0.4f
+#define textureAtlasSize 4
 
 const float cubeVertices[] = {
     // Back face
@@ -75,11 +76,10 @@ void worldCreate(struct World *dest)
         struct Chunk tmpChunk = {0};
         chunkCreate((i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, &tmpChunk);
         chunkTableInsert(dest->chunkTable, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, tmpChunk);
-        INFO("Created chunk at %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
     }
-    for(int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++){
+    for (int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
+    {
         worldGenerateChunkMesh(dest, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
-        INFO("Generated chunk mesh at %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
     }
 }
 
@@ -93,11 +93,13 @@ void worldGetBlockNeighbors(struct World *self, count_t i, struct Chunk currentC
     else
     {
         i4 rightChunkCoords[2] = {chunkCoords[0] + 1, chunkCoords[1]};
-        struct Chunk* rightChunk = chunkTableGet(self->chunkTable, rightChunkCoords);
-        if(rightChunk != NULL){
+        struct Chunk *rightChunk = chunkTableGet(self->chunkTable, rightChunkCoords);
+        if (rightChunk != NULL)
+        {
             neighborTypes[RIGHT] = rightChunk->blockTypeArr[blockCoords[1] * CHUNK_SIZE_X * CHUNK_SIZE_Z + blockCoords[2] * CHUNK_SIZE_X];
         }
-        else{
+        else
+        {
             neighborTypes[RIGHT] = AIR;
         }
     }
@@ -110,11 +112,13 @@ void worldGetBlockNeighbors(struct World *self, count_t i, struct Chunk currentC
     else
     {
         i4 leftChunkCoords[2] = {chunkCoords[0] - 1, chunkCoords[1]};
-        struct Chunk* leftChunk = chunkTableGet(self->chunkTable, leftChunkCoords);
-        if(leftChunk != NULL){
+        struct Chunk *leftChunk = chunkTableGet(self->chunkTable, leftChunkCoords);
+        if (leftChunk != NULL)
+        {
             neighborTypes[LEFT] = leftChunk->blockTypeArr[blockCoords[1] * CHUNK_SIZE_X * CHUNK_SIZE_Z + (blockCoords[2] + 1) * CHUNK_SIZE_X - 1];
         }
-        else{
+        else
+        {
             neighborTypes[LEFT] = AIR;
         }
     }
@@ -127,11 +131,13 @@ void worldGetBlockNeighbors(struct World *self, count_t i, struct Chunk currentC
     else
     {
         i4 backChunkCoords[2] = {chunkCoords[0], chunkCoords[1] - 1};
-        struct Chunk* backChunk = chunkTableGet(self->chunkTable, backChunkCoords);
-        if(backChunk != NULL){
-            neighborTypes[BACK] = backChunk->blockTypeArr[(blockCoords[1] + 1) * CHUNK_SIZE_X * CHUNK_SIZE_Z - CHUNK_SIZE_X + blockCoords[0]];   
+        struct Chunk *backChunk = chunkTableGet(self->chunkTable, backChunkCoords);
+        if (backChunk != NULL)
+        {
+            neighborTypes[BACK] = backChunk->blockTypeArr[(blockCoords[1] + 1) * CHUNK_SIZE_X * CHUNK_SIZE_Z - CHUNK_SIZE_X + blockCoords[0]];
         }
-        else{
+        else
+        {
             neighborTypes[BACK] = AIR;
         }
     }
@@ -144,11 +150,13 @@ void worldGetBlockNeighbors(struct World *self, count_t i, struct Chunk currentC
     else
     {
         i4 frontChunkCoords[2] = {chunkCoords[0], chunkCoords[1] + 1};
-        struct Chunk* frontChunk = chunkTableGet(self->chunkTable, frontChunkCoords);
-        if(frontChunk != NULL){
+        struct Chunk *frontChunk = chunkTableGet(self->chunkTable, frontChunkCoords);
+        if (frontChunk != NULL)
+        {
             neighborTypes[FRONT] = frontChunk->blockTypeArr[(blockCoords[1]) * CHUNK_SIZE_X * CHUNK_SIZE_Z + blockCoords[0]];
         }
-        else{
+        else
+        {
             neighborTypes[FRONT] = AIR;
         }
     }
@@ -174,22 +182,51 @@ void worldGetBlockNeighbors(struct World *self, count_t i, struct Chunk currentC
     }
 }
 
-count_t blockGenerateMesh(u2 face, vec3 position, float *mesh)
+//TODO grass blocklarin yan yuzlerindeki texture ters duruyor duzelt
+count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
 {
     memcpy(mesh, cubeVertices + face * CUBE_VERTEX_SIZE * 6, CUBE_VERTEX_SIZE * sizeof(float) * 6);
+    vec2 uvCoords = {0.0f, 0.0f};
+    switch (blockType)
+    {
+    case 1:
+        uvCoords[0] = 0.25f;
+        uvCoords[1] = 0.75f;
+        break;
+    case 2:
+        uvCoords[0] = 0.0f;
+        uvCoords[1] = 0.75f;
+        break;
+    case 3:
+        if (face == TOP)
+        {
+            uvCoords[0] = 0.75f;
+            uvCoords[1] = 0.75f;
+        }else{
+            uvCoords[0] = 0.50f;
+            uvCoords[1] = 0.75f;
+        }
+        break;
+    default:
+        break;
+    }
     for (int i = 0; i < 6; i++)
     {
         glm_vec3_add(position, mesh + i * CUBE_VERTEX_SIZE, mesh + i * CUBE_VERTEX_SIZE);
+        mesh[i * CUBE_VERTEX_SIZE + 6] *= 0.25f;
+        mesh[i * CUBE_VERTEX_SIZE + 7] *= 0.25f;
+        glm_vec2_add(mesh + i * CUBE_VERTEX_SIZE + 6, uvCoords, mesh + i * CUBE_VERTEX_SIZE + 6);
     }
     return CUBE_VERTEX_SIZE * 6;
 }
 
 void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
 {
-    struct Chunk* chunk = chunkTableGet(self->chunkTable, chunkPos);
+    struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
     count_t totalWritten = 0;
     chunk->mesh = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(float) * CUBE_VERTEX_SIZE * 36);
-    if(chunk->mesh == NULL){
+    if (chunk->mesh == NULL)
+    {
         ERROR("Failed to allocate memory for chunk mesh!\n");
         exit(1);
     }
@@ -205,7 +242,7 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
             {
                 if (neighborTypes[j] == AIR)
                 {
-                    totalWritten += blockGenerateMesh(j, position, chunk->mesh + totalWritten);
+                    totalWritten += blockGenerateMesh(j, chunk->blockTypeArr[i], position, chunk->mesh + totalWritten);
                 }
             }
         }

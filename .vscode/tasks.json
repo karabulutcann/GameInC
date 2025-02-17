@@ -2,7 +2,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "C/C++: clang.exe build active file",
+            "label": "Build project",
             "command": "${workspaceFolder}/build.bat",
             "options": {
                 "cwd": "${fileDirname}"

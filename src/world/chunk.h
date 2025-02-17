@@ -3,7 +3,7 @@
 #include <cglm/cglm.h>
 
 #define CHUNK_SIZE_X 16
-#define CHUNK_SIZE_Y 256
+#define CHUNK_SIZE_Y 32
 #define CHUNK_SIZE_Z 16
 
 #define CUBE_VERTEX_SIZE 8
