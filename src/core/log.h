@@ -30,14 +30,14 @@ struct DisposableString print_mat4(float(m)[4][4]);
         }                                              \
     }
 
-#define INFO(...) _log("INFO", COLOR_INFO, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define ERROR(...) _log("ERROR", COLOR_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define WARN(...) _log("WARN", COLOR_WARN, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define mInfo(...) _log("INFO", COLOR_INFO, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define mError(...) _log("ERROR", COLOR_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define mWarn(...) _log("WARN", COLOR_WARN, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #ifdef DEBUG_ENABLED
-#define DEBUG(...) _log("DEBUG", COLOR_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define mDebug(...) _log("DEBUG", COLOR_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
-#define DEBUG(...)
+#define mDebug(...)
 #endif
 
 void _log(const char *level, short unsigned int color, const char *file, int line, const char *func, const char *format, ...);

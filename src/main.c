@@ -11,6 +11,7 @@
 #include "world/world.h"
 #include "engine/engine.h"
 #include "input.h"
+#include "core/thread.h"
 
 struct Camera camera;
 
@@ -21,8 +22,37 @@ vec3 lightPos = {0.f, 50.0f, 0.0f};
 
 #define cubeSize 0.4f
 
+volatile Bool threadShouldClose = FALSE;
+volatile Bool threadWorldLoaded = FALSE;
+
+void threadFirstLoad(struct World *world)
+{
+    for (index_t i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
+    {
+        worldLoadChunk(world, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
+        mDebug("loaded chunk %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
+    }
+}
+
+mThreadCreateFunc(threadFunction, threadData,{
+    struct Mutex* mutex = threadData->mutex;
+
+    mMutexUse(mutex, world, struct World)
+    {
+        mDebug("Loading world in thread %d\n", threadData->threadId);
+        threadFirstLoad(world);
+    }
+
+    while (!threadShouldClose)
+    {
+    }
+    return 0;
+})
+
 int main()
 {
+    struct ThreadManager threadManager = {0};
+    threadManagerCreate(&threadManager);
 
     struct Engine engine = {0};
     engineCreate(&engine);
@@ -34,10 +64,18 @@ int main()
     struct World world = {0};
     worldCreate(&world);
 
+    struct Mutex worldMutex = {0};
+    InitializeCriticalSection(&worldMutex.critSection);
+    worldMutex.sharedState = &world;
+
+    threadManagerSpawnThread(&threadManager, &worldMutex, threadFunction);
+
     CACHE_RESULT(mCameraCreate(&camera));
 
     while (!windowShouldClose(&engine.window))
     {
+
+        
         engineUpdate(&engine);
         inputProcess(&engine.window, engine.deltaTime, &camera);
         shaderPrepareForDraw(&chunkShader);
@@ -67,10 +105,10 @@ int main()
             }
             shaderSetUniformVec3(&chunkShader, "objectColor", (vec3){1.0f, 1.0f, 1.0f});
             mat4 model = GLM_MAT4_IDENTITY_INIT;
-            glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f,chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
+            glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
             shaderSetUniformMat4(&chunkShader, "model", model);
-            //TODO bunu burda yapma vertex buffer object baglanmadan calismiyor 
-            //glNamedBuffer foksiyonlarini kullan
+            // TODO bunu burda yapma vertex buffer object baglanmadan calismiyor
+            // glNamedBuffer foksiyonlarini kullan
             glBindVertexArray(chunkShader.vertexArrayObject);
             glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
@@ -82,20 +120,26 @@ int main()
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
-        
+
             glDrawArrays(GL_TRIANGLES, 0, chunk->vertexCount);
         }
 
         windowSwapBuffers(&engine.window);
     }
 
-    DEBUG("World destroy");
+    threadShouldClose = TRUE;
+
+    threadManagerWaitForAll(&threadManager, INFINITE);
+
+    threadManagerDestroy(&threadManager);
+
+    mDebug("World destroy");
     worldDestroy(&world);
 
-    DEBUG("Shader destroy");
+    mDebug("Shader destroy");
     shaderDestroy(&chunkShader);
 
-    DEBUG("Engine destroy");
+    mDebug("Engine destroy");
     engineDestroy(&engine);
     return 0;
 }

@@ -40,7 +40,7 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     {
         char infoLog[512];
         glGetProgramInfoLog(dest->id, 512, NULL, infoLog);
-        ERROR("Shader linking failed: %s\n", infoLog);
+        mError("Shader linking failed: %s\n", infoLog);
         exit(1);
     }
     
@@ -68,7 +68,7 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
         shaderTypeName = "Geometry";
         break;
     default:
-        ERROR("Unknown shader type\n");
+        mError("Unknown shader type\n");
         exit(1);
     }
 
@@ -83,7 +83,7 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
     {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        ERROR("%s shader compilation failed: %s\n ", shaderTypeName, infoLog);
+        mError("%s shader compilation failed: %s\n ", shaderTypeName, infoLog);
         exit(1);
     }
 

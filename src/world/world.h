@@ -12,6 +12,10 @@ struct World
 
 void worldCreate(struct World *dest);
 
+void worldLoadChunk(struct World *self, i4 chunkPos[2]);
+
+void worldUnloadChunk(struct World *self, i4 chunkPos[2]);
+
 void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2]);
 
 void worldDestroy(struct World *self);

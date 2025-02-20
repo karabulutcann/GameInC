@@ -1,143 +1,37 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory.h>
+#include "core/core.h"
+#include "core/thread.h"
+#include "core/result.h"
 
-#define POINTER_SIZE sizeof(void *)
 
-enum DataType
-{
-    INT,
-    FLOAT,
-    DOUBLE,
-    STRING,
-    BOOL,
-    CHAR,
-    VOID
-};
 
-struct HashTableMeta
-{
-    unsigned long int length;
-    unsigned long int count;
-    enum DataType type;
-};
-
-typedef void **HashTable;
-
-long hashKey(void* key)
-{
-    return position[0] | ~position[1];
-}
-
-HashTable hashTableCreate(long int length, enum DataType type)
-{
-
-    HashTable table = malloc(sizeof(struct HashTableMeta) + length * POINTER_SIZE);
-    memset(table, 0, sizeof(struct HashTableMeta) + length * POINTER_SIZE);
-    struct HashTableMeta *meta = (struct HashTableMeta *)table;
-    meta->length = length;
-    meta->count = 0;
-    meta->type = type;
-    // Add padding to the end of the table
-    return (HashTable)((char *)table + sizeof(struct HashTableMeta));
-}
-
-struct HashTableMeta *hashTableGetMeta(HashTable table)
-{
-    return (struct HashTableMeta *)((char *)table - sizeof(struct HashTableMeta));
-}
-
-void hashTableInsert(HashTable table, void* key, void *value)
-{
-    struct HashTableMeta *meta = hashTableGetMeta(table);
-    if (meta->count == meta->length)
+mThreadCreateFunc(threadFunction, threadData, {
+    printf("Thread %d waiting for start signal...\n", threadData->threadId);
+    mMutexUse(threadData->mutex, counter, int)
     {
-        printf("Hash table is full!\n");
-        return;
+        *counter += 1;
+        printf("Thread %d incrementing counter to %d\n", threadData->threadId, *counter);
     }
-    unsigned long int key = hash(position) % meta->length;
-    printf("Key is %ld\n", key);
-    void **bucket = ((char *)table + key * POINTER_SIZE);
-    printf("Bucket is %p\n", *bucket);
-    if (*bucket == NULL)
-    {
-        *bucket = value;
-        meta->count++;
-    }
-    else
-    {
-        int isFound = 0;
-        while (isFound)
-        {
-            bucket = ((char *)table + key * POINTER_SIZE);
-            if (*bucket == NULL)
-            {
-                *bucket = value;
-                meta->count++;
-                isFound = 1;
-            }
-            else
-            {
-                key++;
-                if (key == meta->length)
-                {
-                    key = 0;
-                }
-            }
-        }
-    }
-}
-
-void hashTableRemove(HashTable table, long int position[2])
-{
-    struct HashTableMeta *meta = hashTableGetMeta(table);
-    unsigned long int key = hash(position) % meta->length;
-    void **bucket = ((char *)table + key * POINTER_SIZE);
-    if (*bucket == NULL)
-    {
-        printf("Hash table does not contain a value at this position!\n");
-        return;
-    }
-    *bucket = NULL;
-    meta->count--;
-}
-
-// create a callback funtion typedef for validating the key
-
-typedef void* (*hashTableCompareKey)(long int[2]);
-
-void hashTableGet(HashTable table, long int position[2], void **value,)
-{
-    struct HashTableMeta *meta = hashTableGetMeta(table);
-    unsigned long int key = hash(position) % meta->length;
-    void **bucket = ((char *)table + key * POINTER_SIZE);
-    if (*bucket == NULL)
-    {
-        printf("Hash table does not contain a value at this position!\n");
-        return;
-    }
-    *value = *bucket;
-}
-
-struct Chunk
-{
-    int x;
-    int z;
-    int y;
-};
+    return 0;
+})
 
 int main()
 {
+    struct ThreadManager threadManager = {0};
+    threadManagerCreate(&threadManager);
 
-    struct Chunk chunk = {1, 2, 3};
-    struct Chunk chunk2 = {4, 5, 6};
+    struct Mutex mutex = {0};
+    InitializeCriticalSection(&mutex.critSection);
 
-    HashTable table = hashTableCreate(10, INT);
+    int counter = 0;
 
-    hashTableInsert(table, (long int[2]){1, 2}, &chunk);
-    hashTableInsert(table, (long int[2]){3, 4}, &chunk2);
+    mutex.sharedState = &counter;
 
-    printf("Count is %ld\n", hashTableGetMeta(table)->count);
+    CACHE_RESULT(threadManagerSpawnThread(&threadManager, &mutex, threadFunction));
 
+    CACHE_RESULT(threadManagerWaitForAll(&threadManager, INFINITE));
+
+    printf("Counter: %d\n", counter);
+
+    threadManagerDestroy(&threadManager);
     return 0;
 }

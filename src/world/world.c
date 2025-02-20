@@ -71,19 +71,27 @@ enum Face
 void worldCreate(struct World *dest)
 {
     dest->chunkTable = chunkTableCreate(WORLD_SIZE_X * WORLD_SIZE_X);
-    for (int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
+}
+
+void worldLoadChunk(struct World *self, i4 chunkPos[2])
+{
+    struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
+    if (chunk == NULL)
     {
-        struct Chunk tmpChunk = {0};
-        chunkCreate((i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, &tmpChunk);
-        chunkTableInsert(dest->chunkTable, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X}, tmpChunk);
-    }
-    for (int i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
-    {
-        worldGenerateChunkMesh(dest, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
+        chunkCreate(chunkPos, &chunk);
+        chunkTableInsert(self->chunkTable, chunkPos, *chunk);
+        worldGenerateChunkMesh(self, chunkPos);
     }
 }
 
-void worldGetBlockNeighbors(struct World *self, count_t i, struct Chunk currentChunk, i4 chunkCoords[2], count_t blockCoords[3], char neighborTypes[6])
+void worldUnloadChunk(struct World *self, i4 chunkPos[2])
+{
+    struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
+    chunkTableRemove(self->chunkTable, chunkPos);
+    memset(chunk, 0, sizeof(struct Chunk));
+}
+
+void worldGetBlockNeighbors(struct World *self, index_t i, struct Chunk currentChunk, i4 chunkCoords[2], u4 blockCoords[3], char neighborTypes[6])
 {
     // Right face
     if ((blockCoords[0] + 1) < CHUNK_SIZE_X)
@@ -227,7 +235,7 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
     chunk->mesh = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(float) * CUBE_VERTEX_SIZE * 36);
     if (chunk->mesh == NULL)
     {
-        ERROR("Failed to allocate memory for chunk mesh!\n");
+        mError("Failed to allocate memory for chunk mesh!\n");
         exit(1);
     }
     for (int i = 0; i < CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y; i++)

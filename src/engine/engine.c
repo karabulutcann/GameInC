@@ -26,7 +26,7 @@ struct Result engineUpdate(struct Engine * self){
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR)
     {
-        ERROR("OpenGL Error: %d\n", err);
+        mError("OpenGL Error: %d\n", err);
     }
     
     f4 currentFrame = windowGetDeltaTime(&self->window);

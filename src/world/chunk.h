@@ -10,6 +10,7 @@
 
 struct Chunk{
     i4 position[2];
+    Bool isLoaded;
     u1* blockTypeArr;
     float* mesh;
     u4 vertexBufferObject;
@@ -20,7 +21,7 @@ void chunkGenerateMesh(struct Chunk *self);
 
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest);
 
-void chunkDestroy(struct Chunk chunk);
+void chunkDestroy(struct Chunk* chunk);
 
 typedef struct Chunk *ChunkTable;
 

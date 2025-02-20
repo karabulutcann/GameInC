@@ -5,6 +5,6 @@ void checkDisposed(struct DisposableString disposableS)
 {
     if (disposableS.string == NULL)
     {
-        DEBUG("null disposable string used");
+        mDebug("null disposable string used");
     }
 }

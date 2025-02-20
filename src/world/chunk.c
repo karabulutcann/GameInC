@@ -9,6 +9,9 @@
 
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 {
+    
+    memset(dest, 0, sizeof(struct Chunk));
+
     dest->position[0] = chunkPos[0];
     dest->position[1] = chunkPos[1];
 
@@ -68,13 +71,15 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     glGenBuffers(1,&dest->vertexBufferObject);
 }
 
-void chunkDestroy(struct Chunk chunk)
+void chunkDestroy(struct Chunk* chunk)
 {
-    if(chunk.blockTypeArr != NULL){
-        free(chunk.blockTypeArr);
+    if(chunk->blockTypeArr != NULL){
+        free(chunk->blockTypeArr);
+        chunk->blockTypeArr = NULL;
     }
-    if(chunk.mesh != NULL){
-        free(chunk.mesh);
+    if(chunk->mesh != NULL){
+        free(chunk->mesh);
+        chunk->mesh = NULL;
     }
 }
 
@@ -133,7 +138,7 @@ void chunkTableInsert(ChunkTable table, i4 position[2], struct Chunk chunk)
     }
     else
     {
-        INFO("Cant insert chunk at position %d %d\n", position[0], position[1]);
+        mInfo("Cant insert chunk at position %d %d\n", position[0], position[1]);
     }
 }
 
@@ -151,7 +156,7 @@ void chunkTableRemove(ChunkTable table, i4 position[2])
         else if (c.position[0] == position[0] && c.position[1] == position[1])
         {
             // clear Chunk before removing
-            chunkDestroy(c);
+            chunkDestroy(&c);
             table[(key + i) % meta->length] = (struct Chunk){0};
             meta->count--;
             i = -1;
@@ -159,7 +164,7 @@ void chunkTableRemove(ChunkTable table, i4 position[2])
         }
         i++;
     }
-    INFO("Cant remove chunk at position %d %d\n", position[0], position[1]);
+    mInfo("Cant remove chunk at position %d %d\n", position[0], position[1]);
 }
 
 // create a callback funtion typedef for validating the key
@@ -190,7 +195,7 @@ void chunkTableDestroy(ChunkTable table)
     struct ChunkTableMeta *meta = chunkTableGetMeta(table);
     for (int i = 0; i < meta->length; i++)
     {
-        chunkDestroy(table[i]);
+        chunkDestroy(table + i);
     }
     free(meta);
 }

@@ -2,13 +2,22 @@ REM Build script for the test application.
 @ECHO OFF
 SetLocal EnableDelayedExpansion
 
+REM delete everything in bin
+DEL /S /Q playground\bin\*
+
 REM Get a list of all the .cpp files.
 SET cFilenames=
 FOR /R playground %%f in (*.c) do (
     SET cFilenames=!cFilenames!"%%f" 
 )
+
 ECHO %cFilenames%
 SET clibFilenames=
+
+FOR /R src/core %%f in (*.c) do (
+    SET cFilenames=!cFilenames!"%%f" 
+)
+
 SET assembly=playground
 SET compilerFlags=-g -Wall 
 REM Define what to include.

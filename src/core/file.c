@@ -64,7 +64,7 @@ struct Result fileRead(const char *path, char **buffer)
     *buffer = tmp;
     (*buffer)[used] = 0;
 
-	DEBUG("Read file: %s\n", path);
+	mDebug("Read file: %s\n", path);
 
     fclose(fp);
     return ok();

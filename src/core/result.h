@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "core.h"
+#include "log.h"
 
 // error handler
 struct Result
@@ -23,27 +24,27 @@ struct Result ok();
 #define FATAL 1
 
 // Main macro that handles both cases
-#define _CACHE_RESULT_W_OPTIONS(result, isFatal)                        \
-    {                                                                   \
-        struct Result tmpR = result;                                    \
-        if (tmpR.success != 1)                                          \
-        {                                                               \
-            if (isFatal)                                                \
-            {                                                           \
-                mUseDisposableString(tmpR.errMessage)                   \
-                {                                                       \
-                    ERROR("Fatal error: %s\n", tmpR.errMessage.string); \
-                }                                                       \
-                exit(1);                                                \
-            }                                                           \
-            else                                                        \
-            {                                                           \
-                mUseDisposableString(tmpR.errMessage)                   \
-                {                                                       \
-                    ERROR(tmpR.errMessage.string);                      \
-                }                                                       \
-            }                                                           \
-        }                                                               \
+#define _CACHE_RESULT_W_OPTIONS(result, isFatal)                         \
+    {                                                                    \
+        struct Result tmpR = result;                                     \
+        if (tmpR.success != 1)                                           \
+        {                                                                \
+            if (isFatal)                                                 \
+            {                                                            \
+                mUseDisposableString(tmpR.errMessage)                    \
+                {                                                        \
+                    mError("Fatal error: %s\n", tmpR.errMessage.string); \
+                }                                                        \
+                exit(1);                                                 \
+            }                                                            \
+            else                                                         \
+            {                                                            \
+                mUseDisposableString(tmpR.errMessage)                    \
+                {                                                        \
+                    mError(tmpR.errMessage.string);                      \
+                }                                                        \
+            }                                                            \
+        }                                                                \
     }
 
 // Overload macro: Default isFatal to 0

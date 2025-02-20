@@ -19,7 +19,7 @@ static f4 mousePosY = 0.0f;
 // TODO dont use calbacks instead use a error getter and use it in mErr
 void glfwErrorCallback(int error, const char *description)
 {
-    ERROR("GLFW Error [%d]:  %s\n", error, description);
+    mError("GLFW Error [%d]:  %s\n", error, description);
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -64,14 +64,14 @@ struct Result windowCreate(int width, int height, const char *title, struct Wind
         // Dont forget to terminate glfw and free the title before using mErr
         return mErr("Failed to create GLFW window");
     }
-    DEBUG("windows is after %p", dest->windowHandle);
+    mDebug("windows is after %p", dest->windowHandle);
 
     glfwMakeContextCurrent(dest->windowHandle);
     glfwSetFramebufferSizeCallback(dest->windowHandle, framebuffer_size_callback);
     windowToggleMouseLock(dest);
     glfwSetCursorPosCallback(dest->windowHandle, mouseCallbackGLFW);
 
-    DEBUG("w close %d", glfwWindowShouldClose(dest->windowHandle));
+    mDebug("w close %d", glfwWindowShouldClose(dest->windowHandle));
 
 #elif defined(USE_SDL)
     ERROR("SDL not implemented yet");
