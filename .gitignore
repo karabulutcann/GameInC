@@ -1,4 +1,5 @@
-.venv
-.vs
-.build
-.packages
+.venv/
+.vs/
+
+build/
+packages/
