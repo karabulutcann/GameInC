@@ -13,7 +13,7 @@
 #include "input.h"
 #include "core/thread.h"
 
-struct Camera camera;
+volatile struct Camera camera;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -23,29 +23,72 @@ vec3 lightPos = {0.f, 50.0f, 0.0f};
 #define cubeSize 0.4f
 
 volatile Bool threadShouldClose = FALSE;
-volatile Bool threadWorldLoaded = FALSE;
 
-void threadFirstLoad(struct World *world)
+#define LOAD_RADIUS 20
+
+void getPlayerChunkCoords(struct Camera *camera, i4 chunkCoords[2])
 {
-    for (index_t i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
+    chunkCoords[0] = (int)(camera->position[0] / (cubeSize * CHUNK_SIZE_X));
+    chunkCoords[1] = (int)(camera->position[2] / (cubeSize * CHUNK_SIZE_Z));
+}
+
+void loadChunksAroundPlayer(struct World *world, struct Camera *camera)
+{
+    i4 playerChunk[2];
+    getPlayerChunkCoords(camera, playerChunk);
+
+    // Define the loading radius (for example, a 3x3 grid of chunks)
+    int loadRadius = LOAD_RADIUS;
+
+    // TODO tüm chunkları tek tek gezme farklı bir yöntem bul
+    for (int x = (-LOAD_RADIUS / 2); x <= (LOAD_RADIUS / 2); x++)
     {
-        worldLoadChunk(world, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
-        mDebug("loaded chunk %d %d\n", i % WORLD_SIZE_X, i / WORLD_SIZE_X);
+        for (int z = (-LOAD_RADIUS / 2); z <= (LOAD_RADIUS / 2); z++)
+        {
+            i4 chunkCoords[2] = {playerChunk[0] + x, playerChunk[1] + z};
+
+            // Check if the chunk is already loaded
+            struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkCoords);
+            if (chunk == NULL)
+            {
+                // Load the chunk
+                worldLoadChunk(world, chunkCoords);
+                worldGenerateChunkMesh(world, chunkCoords);
+            }
+        }
     }
 }
 
-mThreadCreateFunc(threadFunction, threadData,{
-    struct Mutex* mutex = threadData->mutex;
+void unloadChunks(struct World *world, struct Camera *camera)
+{
+    i4 playerChunk[2];
+    getPlayerChunkCoords(camera, playerChunk);
 
-    mMutexUse(mutex, world, struct World)
+    // Define the unloading radius (you may want to keep a few extra chunks loaded)
+    int unloadRadius = LOAD_RADIUS;
+
+    // Loop through all chunks and unload those outside the radius
+    for (index_t i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
     {
-        mDebug("Loading world in thread %d\n", threadData->threadId);
-        threadFirstLoad(world);
+        // TODO bunu worldUnloadChunk ta zaten yapıyosun bunu iptal et
+        struct Chunk chunk = world->chunkTable[i];
+        if (chunk.blockTypeArr != NULL && abs(chunk.position[0] - playerChunk[0]) > unloadRadius || abs(chunk.position[1] - playerChunk[1]) > unloadRadius)
+        {
+            worldUnloadChunk(world, chunk.position);
+        }
     }
+}
+
+mThreadCreateFunc(threadFunction, threadData, {
+    struct Mutex *mutex = threadData->mutex;
+    struct World *world = (struct World*)mutex->sharedState;
 
     while (!threadShouldClose)
     {
+        loadChunksAroundPlayer(world, &camera);
+        unloadChunks(world, &camera);
     }
+
     return 0;
 })
 
@@ -72,16 +115,17 @@ int main()
 
     CACHE_RESULT(mCameraCreate(&camera));
 
+    mDebug("World loaded\n");
+
     while (!windowShouldClose(&engine.window))
     {
 
-        
         engineUpdate(&engine);
         inputProcess(&engine.window, engine.deltaTime, &camera);
         shaderPrepareForDraw(&chunkShader);
 
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
-        glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 100.0f, projection);
+        glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 300.0f, projection);
 
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         CACHE_RESULT(cameraLookAt(camera, view));
@@ -96,32 +140,45 @@ int main()
         mat4 model = GLM_MAT4_IDENTITY_INIT;
         shaderSetUniformMat4(&chunkShader, "model", model);
 
-        for (i4 i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
+        i4 playerChunk[2];
+        getPlayerChunkCoords(&camera, playerChunk);
+
+        for (i4 x = (i4)(-LOAD_RADIUS / 2); x <= (i4)(LOAD_RADIUS / 2); x++)
         {
-            struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){i % WORLD_SIZE_X, i / WORLD_SIZE_X});
-            if (chunk == NULL)
+            for (i4 z = (i4)(-LOAD_RADIUS / 2); z <= (i4)(LOAD_RADIUS / 2); z++)
             {
-                continue;
+                struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){playerChunk[0] + x, playerChunk[1] + z});
+                if (chunk == NULL || chunk->isLoading == TRUE || chunk->mesh == NULL)
+                {
+                    continue;
+                }
+
+                if (chunk->isVboCreated == FALSE)
+                {
+                    chunkInitVbo(chunk);
+                    chunk->isVboCreated = TRUE;
+                }
+                shaderSetUniformVec3(&chunkShader, "objectColor", (vec3){1.0f, 1.0f, 1.0f});
+                mat4 model = GLM_MAT4_IDENTITY_INIT;
+                glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
+                shaderSetUniformMat4(&chunkShader, "model", model);
+                // TODO bunu burda yapma vertex buffer object baglanmadan calismiyor
+                // glNamedBuffer foksiyonlarini kullan
+                glBindVertexArray(chunkShader.vertexArrayObject);
+                glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
+
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+
+                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+
+                glEnableVertexAttribArray(0);
+                glEnableVertexAttribArray(1);
+                glEnableVertexAttribArray(2);
+
+                glDrawArrays(GL_TRIANGLES, 0, chunk->vertexCount);
             }
-            shaderSetUniformVec3(&chunkShader, "objectColor", (vec3){1.0f, 1.0f, 1.0f});
-            mat4 model = GLM_MAT4_IDENTITY_INIT;
-            glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
-            shaderSetUniformMat4(&chunkShader, "model", model);
-            // TODO bunu burda yapma vertex buffer object baglanmadan calismiyor
-            // glNamedBuffer foksiyonlarini kullan
-            glBindVertexArray(chunkShader.vertexArrayObject);
-            glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
-
-            glDrawArrays(GL_TRIANGLES, 0, chunk->vertexCount);
         }
 
         windowSwapBuffers(&engine.window);

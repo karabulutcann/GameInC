@@ -3,7 +3,7 @@
 #include "chunk.h"
 
 // 10 dan fazla iken zorlaniyo
-#define WORLD_SIZE_X 10
+#define WORLD_SIZE_X 60
 
 struct World
 {

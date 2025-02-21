@@ -6,7 +6,7 @@
             "name": "windows",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/test.exe",
+            "program": "${workspaceFolder}/build/Debug/TestApp.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/",

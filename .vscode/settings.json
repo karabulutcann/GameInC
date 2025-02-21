@@ -29,7 +29,8 @@
         "engine.h": "c",
         "input.h": "c",
         "rapidhash.h": "c",
-        "thread.h": "c"
+        "thread.h": "c",
+        "ft2build.h": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

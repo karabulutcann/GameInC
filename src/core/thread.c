@@ -64,7 +64,7 @@ struct Result threadManagerWaitForAll(struct ThreadManager *self, DWORD timeout)
     if (self->threadCount == 0)
         return mErr("No threads");
 
-    HANDLE threads[self->threadCount];
+    HANDLE* threads = malloc(sizeof(HANDLE) * self->threadCount);
     memset(threads, 0, sizeof(HANDLE) * self->threadCount);
 
     for (index_t i = 0; i < self->threadCount; i++)
@@ -75,6 +75,7 @@ struct Result threadManagerWaitForAll(struct ThreadManager *self, DWORD timeout)
         return mErr("Timeout");
     }
 
+    free(threads);
     return ok();
 }
 

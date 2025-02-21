@@ -18,8 +18,8 @@ struct Mutex
 
 #define mMutexUse(mutex,data,dataType) \
     EnterCriticalSection(&mutex->critSection); \
-    dataType* data = (dataType *)mutex->sharedState; \ 
-    for(u1 i = 0; i < 1; i++, LeaveCriticalSection(&mutex->critSection)) \
+    dataType* data = (dataType *)mutex->sharedState; \
+    for(u1 i = 0; i < 1;LeaveCriticalSection(&mutex->critSection), i++) 
 
 struct ThreadData
 {

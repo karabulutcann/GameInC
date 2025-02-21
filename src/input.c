@@ -41,7 +41,7 @@ void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera)
 
     if (windowGetKey(window, KEY_LEFT_SHIFT) == KEY_DOWN)
     {
-        camera->movementSpeed = 20.0f;
+        camera->movementSpeed = 50.0f;
     }
     else
     {

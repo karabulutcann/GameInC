@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/code/engine/packages/freetype-2.13.3/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

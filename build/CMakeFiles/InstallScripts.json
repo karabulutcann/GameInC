@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/code/engine/build/cmake_install.cmake",
+		"C:/code/engine/build/packages/freetype/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

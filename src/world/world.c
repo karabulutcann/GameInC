@@ -75,18 +75,19 @@ void worldCreate(struct World *dest)
 
 void worldLoadChunk(struct World *self, i4 chunkPos[2])
 {
-    struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
-    if (chunk == NULL)
-    {
-        chunkCreate(chunkPos, &chunk);
-        chunkTableInsert(self->chunkTable, chunkPos, *chunk);
-        worldGenerateChunkMesh(self, chunkPos);
+    struct Chunk chunk = {0};
+    chunkCreate(chunkPos, &chunk);
+    struct Result r = chunkTableInsert(self->chunkTable, chunkPos, chunk);
+    if(!r.success){
+        chunkDestroy(&chunk);
+        CACHE_RESULT(r)
     }
 }
 
 void worldUnloadChunk(struct World *self, i4 chunkPos[2])
 {
     struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
+    chunk->isLoading = TRUE;
     chunkTableRemove(self->chunkTable, chunkPos);
     memset(chunk, 0, sizeof(struct Chunk));
 }
@@ -191,10 +192,12 @@ void worldGetBlockNeighbors(struct World *self, index_t i, struct Chunk currentC
 }
 
 //TODO grass blocklarin yan yuzlerindeki texture ters duruyor duzelt
+//TODO texturelar bir sonraki texturlara tasiyor duzelt
 count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
 {
     memcpy(mesh, cubeVertices + face * CUBE_VERTEX_SIZE * 6, CUBE_VERTEX_SIZE * sizeof(float) * 6);
     vec2 uvCoords = {0.0f, 0.0f};
+
     switch (blockType)
     {
     case 1:
@@ -221,8 +224,7 @@ count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
     for (int i = 0; i < 6; i++)
     {
         glm_vec3_add(position, mesh + i * CUBE_VERTEX_SIZE, mesh + i * CUBE_VERTEX_SIZE);
-        mesh[i * CUBE_VERTEX_SIZE + 6] *= 0.25f;
-        mesh[i * CUBE_VERTEX_SIZE + 7] *= 0.25f;
+        glm_vec2_scale(mesh + i * CUBE_VERTEX_SIZE + 6, 0.25f, mesh + i * CUBE_VERTEX_SIZE + 6);
         glm_vec2_add(mesh + i * CUBE_VERTEX_SIZE + 6, uvCoords, mesh + i * CUBE_VERTEX_SIZE + 6);
     }
     return CUBE_VERTEX_SIZE * 6;
@@ -231,7 +233,12 @@ count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
 void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
 {
     struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
+    if(chunk == NULL){
+        return;
+    }
+    chunk->isLoading = TRUE;
     count_t totalWritten = 0;
+    //TODO max mesh size da memory allocateliyosun meshi oluşturduktan sonra yeniden boyutlandır
     chunk->mesh = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(float) * CUBE_VERTEX_SIZE * 36);
     if (chunk->mesh == NULL)
     {
@@ -242,7 +249,7 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
     {
         if (chunk->blockTypeArr[i] != AIR)
         {
-            count_t coords[3] = {i % CHUNK_SIZE_X, i / CHUNK_SIZE_X / CHUNK_SIZE_Z, i / CHUNK_SIZE_X % CHUNK_SIZE_Z};
+            u4 coords[3] = {i % CHUNK_SIZE_X, i / CHUNK_SIZE_X / CHUNK_SIZE_Z, i / CHUNK_SIZE_X % CHUNK_SIZE_Z};
             vec3 position = {(coords[0]) * cubeSize, (coords[1]) * cubeSize, (coords[2]) * cubeSize};
             char neighborTypes[6] = {0};
             worldGetBlockNeighbors(self, i, *chunk, chunkPos, coords, neighborTypes);
@@ -256,8 +263,8 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
         }
     }
     chunk->vertexCount = totalWritten;
-    glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, chunk->vertexCount * sizeof(float), chunk->mesh, GL_STATIC_DRAW);
+    chunk->isLoading = FALSE;
+
 }
 
 void worldDestroy(struct World *self)

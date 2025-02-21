@@ -1,5 +1,6 @@
 #pragma once
 #include "core/core.h"
+#include "core/result.h"
 #include <cglm/cglm.h>
 
 #define CHUNK_SIZE_X 16
@@ -10,7 +11,8 @@
 
 struct Chunk{
     i4 position[2];
-    Bool isLoaded;
+    Bool isVboCreated;
+    Bool isLoading;
     u1* blockTypeArr;
     float* mesh;
     u4 vertexBufferObject;
@@ -21,6 +23,8 @@ void chunkGenerateMesh(struct Chunk *self);
 
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest);
 
+void chunkInitVbo(struct Chunk *self);
+
 void chunkDestroy(struct Chunk* chunk);
 
 typedef struct Chunk *ChunkTable;
@@ -29,7 +33,7 @@ struct ChunkTableMeta *chunkTableGetMeta(ChunkTable table);
 
 ChunkTable chunkTableCreate(u4 length);
 
-void chunkTableInsert(ChunkTable table, i4 position[2], struct Chunk chunk);
+struct Result chunkTableInsert(ChunkTable table, i4 position[2], struct Chunk chunk);
 
 void chunkTableRemove(ChunkTable table, i4 position[2]);
 

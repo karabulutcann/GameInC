@@ -1,0 +1,9 @@
+C:/code/engine/build/CMakeFiles/TestApp.dir
+C:/code/engine/build/CMakeFiles/PACKAGE.dir
+C:/code/engine/build/CMakeFiles/INSTALL.dir
+C:/code/engine/build/CMakeFiles/ALL_BUILD.dir
+C:/code/engine/build/CMakeFiles/ZERO_CHECK.dir
+C:/code/engine/build/packages/freetype/CMakeFiles/freetype.dir
+C:/code/engine/build/packages/freetype/CMakeFiles/PACKAGE.dir
+C:/code/engine/build/packages/freetype/CMakeFiles/INSTALL.dir
+C:/code/engine/build/packages/freetype/CMakeFiles/ALL_BUILD.dir
