@@ -19,10 +19,16 @@
     <ClCompile Include="C:\code\engine\src\core\safe_array.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\safe_memory.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\code\engine\src\core\safe_strings.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\code\engine\src\core\thread.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\worker.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\code\engine\src\engine\engine.c">

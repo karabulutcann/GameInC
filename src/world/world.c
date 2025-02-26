@@ -24,19 +24,19 @@ const float cubeVertices[] = {
     -size, -size, size, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
 
     // left face
-    -size, size, size, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-right
-    -size, size, -size, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
-    -size, -size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-    -size, -size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-    -size, -size, size, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
-    -size, size, size, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-right
+    -size, size, size, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top-right
+    -size, size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // top-left
+    -size, -size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+    -size, -size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+    -size, -size, size, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // bottom-right
+    -size, size, size, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top-right
 
     // right face
-    size, size, size, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-left
-    size, -size, -size, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
+    size, size, size, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // top-left
+    size, -size, -size, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-right
     size, size, -size, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-right
-    size, -size, -size, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-right
-    size, size, size, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-left
+    size, -size, -size, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+    size, size, size, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // top-left
     size, -size, size, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 
     // bottom face
@@ -56,7 +56,19 @@ const float cubeVertices[] = {
     -size, size, size, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 };
 
-#define AIR 0
+enum BlockType
+{
+    AIR,
+    DIRT,
+    STONE,
+    GRASS,
+    OAK_PLANK,
+    OAK_LOG,
+    CRAFTING_TABLE,
+    STONE_BRICK,
+    MOSSY_STONE_BRICK,
+    CRACKED_STONE_BRICK,
+};
 
 enum Face
 {
@@ -78,7 +90,8 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2])
     struct Chunk chunk = {0};
     chunkCreate(chunkPos, &chunk);
     struct Result r = chunkTableInsert(self->chunkTable, chunkPos, chunk);
-    if(!r.success){
+    if (!r.success)
+    {
         chunkDestroy(&chunk);
         CACHE_RESULT(r)
     }
@@ -191,40 +204,83 @@ void worldGetBlockNeighbors(struct World *self, index_t i, struct Chunk currentC
     }
 }
 
-//TODO grass blocklarin yan yuzlerindeki texture ters duruyor duzelt
-//TODO texturelar bir sonraki texturlara tasiyor duzelt
+// TODO grass blocklarin yan yuzlerindeki texture ters duruyor duzelt
+// TODO texturelar bir sonraki texturlara tasiyor duzelt
 count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
 {
     memcpy(mesh, cubeVertices + face * CUBE_VERTEX_SIZE * 6, CUBE_VERTEX_SIZE * sizeof(float) * 6);
     vec2 uvCoords = {0.0f, 0.0f};
+    float singleBlockSize = 1.0f / 4;
 
     switch (blockType)
     {
-    case 1:
-        uvCoords[0] = 0.25f;
-        uvCoords[1] = 0.75f;
+    case DIRT:
+        uvCoords[0] = singleBlockSize * 0;
+        uvCoords[1] = singleBlockSize * 2;
         break;
-    case 2:
-        uvCoords[0] = 0.0f;
-        uvCoords[1] = 0.75f;
-        break;
-    case 3:
+
+    case GRASS:
         if (face == TOP)
         {
-            uvCoords[0] = 0.75f;
-            uvCoords[1] = 0.75f;
-        }else{
-            uvCoords[0] = 0.50f;
-            uvCoords[1] = 0.75f;
+            uvCoords[0] = singleBlockSize * 2;
+            uvCoords[1] = singleBlockSize * 2;
+        }
+        else
+        {
+            uvCoords[0] = singleBlockSize * 1;
+            uvCoords[1] = singleBlockSize * 2;
         }
         break;
+    case OAK_PLANK:
+        uvCoords[0] = singleBlockSize * 2;
+        uvCoords[1] = singleBlockSize * 1;
+        break;
+    case OAK_LOG:
+        if (face == TOP)
+        {
+            uvCoords[0] = singleBlockSize * 1;
+            uvCoords[1] = singleBlockSize * 1;
+        }
+        else
+        {
+            // uvCoords[0] = singleBlockSize * 0;
+            uvCoords[1] = singleBlockSize * 1;
+        }
+        break;
+    case CRAFTING_TABLE:
+        if(face == TOP || face == BOTTOM)
+        {
+            uvCoords[0] = singleBlockSize * 3;
+            uvCoords[1] = singleBlockSize * 3;
+        }
+        else if (face == FRONT)
+        {
+            uvCoords[0] = singleBlockSize * 2;
+            uvCoords[1] = singleBlockSize * 3;
+        }
+        else
+        {
+            uvCoords[0] = singleBlockSize * 1;
+            uvCoords[1] = singleBlockSize * 3;
+        }
+        break;
+    case STONE_BRICK:
+        uvCoords[0] = singleBlockSize * 1;
+        // uvCoords[1] = singleBlockSize * 0;
+    case MOSSY_STONE_BRICK:
+        uvCoords[0] = singleBlockSize * 3;
+        uvCoords[1] = singleBlockSize * 2;
+    case CRACKED_STONE_BRICK:
+        // uvCoords[0] = singleBlockSize * 0;
+        uvCoords[1] = singleBlockSize * 3;
+    case STONE:
     default:
         break;
     }
     for (int i = 0; i < 6; i++)
     {
         glm_vec3_add(position, mesh + i * CUBE_VERTEX_SIZE, mesh + i * CUBE_VERTEX_SIZE);
-        glm_vec2_scale(mesh + i * CUBE_VERTEX_SIZE + 6, 0.25f, mesh + i * CUBE_VERTEX_SIZE + 6);
+        glm_vec2_scale(mesh + i * CUBE_VERTEX_SIZE + 6, singleBlockSize, mesh + i * CUBE_VERTEX_SIZE + 6);
         glm_vec2_add(mesh + i * CUBE_VERTEX_SIZE + 6, uvCoords, mesh + i * CUBE_VERTEX_SIZE + 6);
     }
     return CUBE_VERTEX_SIZE * 6;
@@ -233,12 +289,13 @@ count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
 void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
 {
     struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
-    if(chunk == NULL){
+    if (chunk == NULL)
+    {
         return;
     }
     chunk->isLoading = TRUE;
     count_t totalWritten = 0;
-    //TODO max mesh size da memory allocateliyosun meshi oluşturduktan sonra yeniden boyutlandır
+    // TODO max mesh size da memory allocateliyosun meshi oluşturduktan sonra yeniden boyutlandır
     chunk->mesh = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(float) * CUBE_VERTEX_SIZE * 36);
     if (chunk->mesh == NULL)
     {
@@ -264,7 +321,6 @@ void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
     }
     chunk->vertexCount = totalWritten;
     chunk->isLoading = FALSE;
-
 }
 
 void worldDestroy(struct World *self)

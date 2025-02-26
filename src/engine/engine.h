@@ -4,7 +4,7 @@
 
 struct Engine{
     struct Window window;
-
+    
     f4 deltaTime;
     f4 lastFrame;
 };

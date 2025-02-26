@@ -20,33 +20,37 @@ void main()
     // normal = normal * 2.0 - 1.0;
 
     // normal = normalize(TBN * normal);  
+    float gamma = 2.2;
     vec3 normal = normalize(Normal);
     // ambient
     float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * lightColor;
-  	
-    // diffuse 
-    vec3 norm = normal;
+
     vec3 lightDir = normalize(lightPos - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
+  	vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+
+    // diffuse 
+
+    float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
     
     // specular
     float specularStrength = 0.5;
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;  
 
-    vec3 result = (ambient + diffuse + specular) * objectColor; 
+    // float max_distance = 1.5;
+    // float distance = length(lightPos - FragPos);
+    // float attenuation = 1.0 / distance;
 
-    // if(Chunk == 1u){
-    //     FragColor = texture(image,TexCoords) * vec4(result, 1.0);
-    // }else if(Chunk == 2u){
-    //     FragColor = texture(cobblestoneT,TexCoords) * vec4(result, 1.0);
-    // }else{
-    //     //TODO air blocklari baska yerde sil burda yapmak performsi ektiliyo
-    //     discard;
-    // }
-    FragColor = texture(textureAtlas,TexCoords) * vec4(result, 1.0);
+    // diffuse *= attenuation;
+    // specular *= attenuation;
+
+    vec3 result = (ambient + diffuse + specular); 
+    vec3 color = texture(textureAtlas,TexCoords).rgb;
+    color = color * result;
+    color = pow(color, vec3(1.0/gamma));
+    FragColor = vec4(color, 1.0);
 } 

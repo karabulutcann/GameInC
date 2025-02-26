@@ -338,8 +338,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\code\engine\src\core\log.c" />
     <ClCompile Include="C:\code\engine\src\core\result.c" />
     <ClCompile Include="C:\code\engine\src\core\safe_array.c" />
+    <ClCompile Include="C:\code\engine\src\core\safe_memory.c" />
     <ClCompile Include="C:\code\engine\src\core\safe_strings.c" />
     <ClCompile Include="C:\code\engine\src\core\thread.c" />
+    <ClCompile Include="C:\code\engine\src\core\worker.c" />
     <ClCompile Include="C:\code\engine\src\engine\engine.c" />
     <ClCompile Include="C:\code\engine\src\engine\shader.c" />
     <ClCompile Include="C:\code\engine\src\engine\texture.c" />

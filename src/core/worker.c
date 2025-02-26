@@ -1,5 +1,0 @@
-struct Worker{};
-
-struct Job{
-    
-};

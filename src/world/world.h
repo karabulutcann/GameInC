@@ -1,6 +1,7 @@
 #pragma once
 #include "core/core.h"
 #include "chunk.h"
+#include "FastNoiseLight/FastNoiseLite.h"
 
 // 10 dan fazla iken zorlaniyo
 #define WORLD_SIZE_X 60

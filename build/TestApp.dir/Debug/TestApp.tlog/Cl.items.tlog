@@ -4,8 +4,10 @@ C:\code\engine\src\core\file.c;C:\code\engine\build\TestApp.dir\Debug\file.obj
 C:\code\engine\src\core\log.c;C:\code\engine\build\TestApp.dir\Debug\log.obj
 C:\code\engine\src\core\result.c;C:\code\engine\build\TestApp.dir\Debug\result.obj
 C:\code\engine\src\core\safe_array.c;C:\code\engine\build\TestApp.dir\Debug\safe_array.obj
+C:\code\engine\src\core\safe_memory.c;C:\code\engine\build\TestApp.dir\Debug\safe_memory.obj
 C:\code\engine\src\core\safe_strings.c;C:\code\engine\build\TestApp.dir\Debug\safe_strings.obj
 C:\code\engine\src\core\thread.c;C:\code\engine\build\TestApp.dir\Debug\thread.obj
+C:\code\engine\src\core\worker.c;C:\code\engine\build\TestApp.dir\Debug\worker.obj
 C:\code\engine\src\engine\engine.c;C:\code\engine\build\TestApp.dir\Debug\engine.obj
 C:\code\engine\src\engine\shader.c;C:\code\engine\build\TestApp.dir\Debug\shader.obj
 C:\code\engine\src\engine\texture.c;C:\code\engine\build\TestApp.dir\Debug\texture.obj

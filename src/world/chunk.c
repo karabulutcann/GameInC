@@ -35,6 +35,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     noise_state.octaves = 4;
     noise_state.gain = 0.4f;
 
+
     for (int x = 0; x < CHUNK_SIZE_X; x++)
     {
         for (int z = 0; z < CHUNK_SIZE_Z; z++)
@@ -46,7 +47,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 
             // Sample noise to determine terrain height
             float height_sample = fnlGetNoise2D(&noise_state, world_x, world_z);
-            int terrain_height = 20 + (int)((height_sample) * 50);
+            int terrain_height = 10 + (int)((height_sample * height_sample) * 50);
             for (int y = 0; y < CHUNK_SIZE_Y; y++)
             {
                 unsigned int block_id = 0; // Default: air
