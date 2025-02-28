@@ -100,6 +100,10 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2])
 void worldUnloadChunk(struct World *self, i4 chunkPos[2])
 {
     struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
+    if (chunk == NULL)
+    {
+        return;
+    }
     chunk->isLoading = TRUE;
     chunkTableRemove(self->chunkTable, chunkPos);
     memset(chunk, 0, sizeof(struct Chunk));

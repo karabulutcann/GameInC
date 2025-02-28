@@ -5,6 +5,8 @@
 #include <cglm/cglm.h>
 #include "shader.h"
 
+#include <string.h>
+
 const char *defaultVertexShader = "#version 330 core\n"
                                   "layout (location = 0) in vec3 aPos;\n"
                                   "void main()\n"
@@ -40,20 +42,60 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     {
         char infoLog[512];
         glGetProgramInfoLog(dest->id, 512, NULL, infoLog);
-        mError("Shader linking failed: %s\n", infoLog);
-        exit(1);
+        glDeleteProgram(dest->id);
+        return mErr(format("Shader linking failed: %s\n", infoLog));
+    }
+
+    i4 attributeCount;
+    glGetProgramiv(dest->id, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+    mDebug("Attribute count: %d\n", attributeCount);
+    dest->attributeCount = attributeCount;
+
+    for(index_t i = 0; i < attributeCount; i++){
+        char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
+        size written = 0;
+        GLint size = 0;
+        GLenum type = 0;
+        glGetActiveAttrib(dest->id, (GLuint)i, MAX_SHADER_VARIABLE_NAME_LENGTH, &written, &size, &type, name);
+        mDebug("Attribute %d: %s\n", i, name);
+
+        dest->attributes[i].location = glGetAttribLocation(dest->id, name);
+        dest->attributes[i].type = type;
+        dest->attributes[i].normalized = GL_FALSE;
+        dest->attributes[i].stride = 0;
+        dest->attributes[i].offset = 0;
+    }
+
+    // eger uniformlar shaderda kullanilmiyosa yada out degerlerini degistirmiyosa active sayilmiyo 
+    // oyuzden tum uniformlar gorunmuyor
+    i4 uniformCount;
+    glGetProgramiv(dest->id, GL_ACTIVE_UNIFORMS, &uniformCount);
+    mDebug("Uniform count: %d\n", uniformCount);
+    dest->uniformCount = uniformCount;
+
+    for(index_t i = 0; i < uniformCount; i++){
+        char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
+        size written = 0;
+        GLint size = 0;
+        GLenum type = 0;
+        glGetActiveUniform(dest->id, (GLuint)i, MAX_SHADER_VARIABLE_NAME_LENGTH, &written, &size, &type, name);
+        mDebug("Uniform %d: %s\n", i, name);
+
+        strcpy(dest->uniforms[i].name, name);
+        dest->uniforms[i].type = type;
+        dest->uniforms[i].size = size;
     }
     
-    glGenVertexArrays(1, &dest->vertexArrayObject);
-    glBindVertexArray(dest->vertexArrayObject);
+    glCreateVertexArrays(1, &dest->vertexArrayObject);
 
     return ok();
 }
 
+//TODO return a result
 void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shaderType)
 {
     char *shaderCode;
-    int success;
+    i4 success;
     const char *shaderTypeName = NULL;
 
     switch (shaderType)
@@ -74,15 +116,19 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
 
     CACHE_RESULT(fileRead(path, &shaderCode), FATAL);
 
-    unsigned int shader = glCreateShader(shaderType);
+    u4 shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &shaderCode, NULL);
     glCompileShader(shader);
 
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
     if (!success)
     {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
+        size infoLogSizeWithoutNull = 0;
+        glGetShaderInfoLog(shader, 0, &infoLogSizeWithoutNull, NULL);
+        //TODO change this with custom string
+        char *infoLog = malloc(infoLogSizeWithoutNull + 1);
+        glGetShaderInfoLog(shader, infoLogSizeWithoutNull, NULL, infoLog);
         mError("%s shader compilation failed: %s\n ", shaderTypeName, infoLog);
         exit(1);
     }
@@ -93,14 +139,24 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
     free(shaderCode);
 }
 
+
+
+void shaderBindBuffers(struct Shader *self,count_t bindingCount,struct ShaderBufferBinding* bindings,GlVertexBuffer buffer){
+    for(index_t i = 0; i < bindingCount; i++){
+        glEnableVertexArrayAttrib(self->vertexArrayObject, i);
+        glVertexArrayAttribFormat(self->vertexArrayObject, i, bindings[i].valueCount, bindings[i].type, bindings[i].normalized, bindings[i].offset);
+        //glVertexArrayAttribBinding(self->vertexArrayObject, i, i);
+        glVertexArrayVertexBuffer(self->vertexArrayObject, i, buffer, bindings[i].offset, bindings[i].stride);
+    }
+}
+
 typedef void (*shaderPrepareCallback)(struct Shader* self);
 
 void shaderPrepareForDraw(struct Shader *self)
 {
     glUseProgram(self->id);
     for(int i = 0; i < self->textureCount; i++){
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, self->textures[i].id);
+        glBindTextureUnit(i, self->textures[i].id);
     }
 }
 
@@ -110,7 +166,7 @@ void shaderCreateTexture(struct Shader *self, const char *imagePath, const char 
     self->textureCount++;
 
     shaderUse(self);
-    shaderSetUniformInt(self,samplerName, (i4)(self->textureCount - 1));
+    shaderSetInt(self,samplerName, (i4)(self->textureCount - 1));
 }
 
 void shaderUse(struct Shader *self)
@@ -118,34 +174,35 @@ void shaderUse(struct Shader *self)
     glUseProgram(self->id);
 }
 
-void shaderSetUniformBool(struct Shader *self, const char *name, Bool value)
+
+void shaderSetBool(struct Shader *self, const char *name, Bool value)
 {
-    glUniform1i(glGetUniformLocation(self->id, name), value);
+    glProgramUniform1i(self->id, glGetUniformLocation(self->id, name), value);
 }
 
-void shaderSetUniformInt(struct Shader *self, const char *name, int value)
+void shaderSetInt(struct Shader *self, const char *name, int value)
 {
-    glUniform1i(glGetUniformLocation(self->id, name), value);
+    glProgramUniform1i(self->id, glGetUniformLocation(self->id, name), value);
 }
 
-void shaderSetUniformFloat(struct Shader *self, const char *name, float value)
+void shaderSetFloat(struct Shader *self, const char *name, float value)
 {
-    glUniform1f(glGetUniformLocation(self->id, name), value);
+    glProgramUniform1f(self->id, glGetUniformLocation(self->id, name), value);
 }
 
-void shaderSetUniformVec3(struct Shader *self, const char *name, vec3 value)
+void shaderSetVec3(struct Shader *self, const char *name, vec3 value)
 {
-    glUniform3fv(glGetUniformLocation(self->id, name), 1, value);
+    glProgramUniform3fv(self->id, glGetUniformLocation(self->id, name), 1, value);
 }
 
-void shaderSetUniformVec3Arr(struct Shader *self, const char *name, size_t arrSize, vec3 value)
+void shaderSetVec3Arr(struct Shader *self, const char *name, size_t arrSize, vec3 value)
 {
-    glUniform3fv(glGetUniformLocation(self->id, name), arrSize, value);
+    glProgramUniform3fv(self->id, glGetUniformLocation(self->id, name), arrSize, value);
 }
 
-void shaderSetUniformMat4(struct Shader *self, const char *name, mat4 value)
+void shaderSetMat4(struct Shader *self, const char *name, mat4 value)
 {
-    glUniformMatrix4fv(glGetUniformLocation(self->id, name), 1, GL_FALSE, &value[0][0]);
+    glProgramUniformMatrix4fv(self->id, glGetUniformLocation(self->id, name), 1, GL_FALSE, &value[0][0]);
 }
 
 void shaderDestroy(struct Shader *self)

@@ -60,3 +60,12 @@ typedef u8 count_t;
 
 typedef u8 index_t;
 
+typedef u4 GlFrameBuffer;
+
+typedef u4 GlTexture;
+
+typedef u4 GlRenderBuffer;
+
+typedef u4 GlVertexBuffer;
+
+typedef u4 GlVertexArray;

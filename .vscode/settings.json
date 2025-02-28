@@ -31,7 +31,9 @@
         "rapidhash.h": "c",
         "thread.h": "c",
         "ft2build.h": "c",
-        "fastnoiselite.h": "c"
+        "fastnoiselite.h": "c",
+        "call.h": "c",
+        "vec2.h": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

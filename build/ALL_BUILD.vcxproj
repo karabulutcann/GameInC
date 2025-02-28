@@ -178,10 +178,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{7581440E-025A-300D-B818-95043D1B0E0F}</Project>
       <Name>TestApp</Name>
     </ProjectReference>
-    <ProjectReference Include="C:\code\engine\build\packages\freetype\freetype.vcxproj">
-      <Project>{EB8E0366-6221-3086-8B43-EBB605D9DDC0}</Project>
-      <Name>freetype</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

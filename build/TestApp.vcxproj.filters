@@ -34,6 +34,9 @@
     <ClCompile Include="C:\code\engine\src\engine\engine.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\code\engine\src\engine\mesh.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\code\engine\src\engine\shader.c">
       <Filter>Source Files</Filter>
     </ClCompile>

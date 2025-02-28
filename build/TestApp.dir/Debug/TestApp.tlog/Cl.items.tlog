@@ -9,6 +9,7 @@ C:\code\engine\src\core\safe_strings.c;C:\code\engine\build\TestApp.dir\Debug\sa
 C:\code\engine\src\core\thread.c;C:\code\engine\build\TestApp.dir\Debug\thread.obj
 C:\code\engine\src\core\worker.c;C:\code\engine\build\TestApp.dir\Debug\worker.obj
 C:\code\engine\src\engine\engine.c;C:\code\engine\build\TestApp.dir\Debug\engine.obj
+C:\code\engine\src\engine\mesh.c;C:\code\engine\build\TestApp.dir\Debug\mesh.obj
 C:\code\engine\src\engine\shader.c;C:\code\engine\build\TestApp.dir\Debug\shader.obj
 C:\code\engine\src\engine\texture.c;C:\code\engine\build\TestApp.dir\Debug\texture.obj
 C:\code\engine\src\engine\window.c;C:\code\engine\build\TestApp.dir\Debug\window.obj
