@@ -1,14 +1,20 @@
 {
-  "dependencies": [
+  "dependencies": [],
+  "_": [
     {
       "name": "cJSON",
       "version": "1.7.18",
       "url": "https://github.com/DaveGamble/cJSON.git"
     },
     {
-        "name": "cglm",
-        "version": "0.9.6",
-        "url": "https://github.com/recp/cglm.git"
+      "name": "cglm",
+      "version": "0.9.6",
+      "url": "https://github.com/recp/cglm.git"
+    },
+    {
+      "name": "JoltPhysics",
+      "version": "5.2.0",
+      "url": "https://github.com/jrouwe/JoltPhysics.git"
     }
   ]
 }

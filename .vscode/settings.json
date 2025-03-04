@@ -33,7 +33,20 @@
         "ft2build.h": "c",
         "fastnoiselite.h": "c",
         "call.h": "c",
-        "vec2.h": "c"
+        "vec2.h": "c",
+        "thread": "cpp",
+        "chunk.h": "c",
+        "array": "c",
+        "iterator": "c",
+        "list": "c",
+        "vector": "c",
+        "xhash": "c",
+        "xtree": "c",
+        "format": "c",
+        "random": "c",
+        "xstring": "c",
+        "xiosbase": "c",
+        "glu.h": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

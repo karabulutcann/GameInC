@@ -1,4 +1,7 @@
 #include "camera.h"
+#include "world/chunk.h"
+#include "world/world.h"
+#include <math.h>
 
 struct Result _cameraCreate(struct CameraCreateOptions options, struct Camera* dest){
     if (!dest) return mErr("Destination cant be null");
@@ -63,4 +66,66 @@ struct Result cameraUpdateDirection(struct Camera* camera, float xoffset, float 
     //bu calismiyor mouse hareket edince her sey kayboluyor
     // glm_vec3_cross(camera->right, camera->front, camera->up);
     return ok();
+}
+
+
+RaycastHit RaycastBlock(vec3 origin, vec3 direction,struct Chunk* chunk) {
+    IVec3 mapCheck = { (i4)floor(origin[0] / cubeSize), (i4)floor(origin[1] / cubeSize), (i4)floor(origin[2] / cubeSize) };
+   
+    IVec3 step = {direction[0] > 0 ? 1 : -1, direction[1] > 0 ? 1 : -1, direction[2] > 0 ? 1 : -1};
+
+    Vec3 rayUnitStepSize = {
+        fabsf(1.0f / direction[0]),
+        fabsf(1.0f / direction[1]),
+        fabsf(1.0f / direction[2])
+    };
+
+    Vec3 rayLength1D = {
+        (step.x > 0 ? (mapCheck.x + 1) * cubeSize - origin[0] : origin[0] - mapCheck.x * cubeSize) * rayUnitStepSize.x,
+        (step.y > 0 ? (mapCheck.y + 1) * cubeSize - origin[1] : origin[1] - mapCheck.y * cubeSize) * rayUnitStepSize.y,
+        (step.z > 0 ? (mapCheck.z + 1) * cubeSize - origin[2] : origin[2] - mapCheck.z * cubeSize) * rayUnitStepSize.z
+    };
+
+    // Raycasting loop
+    float maxDistance = 8.0f; // Max block reach
+    float distance = 0.0f;
+    // IVec3 lastValidPos = mapCheck;
+
+    while (distance < maxDistance) {
+        // Move along the shortest path
+        if (rayLength1D.x < rayLength1D.y && rayLength1D.x < rayLength1D.z) {
+            distance = rayLength1D.x;
+            mapCheck.x += step.x;
+            rayLength1D.x += rayUnitStepSize.x;
+        } else if (rayLength1D.y < rayLength1D.z) {
+            distance = rayLength1D.y;
+            mapCheck.y += step.y;
+            rayLength1D.y += rayUnitStepSize.y;
+        } else {
+            distance = rayLength1D.z;
+            mapCheck.z += step.z;
+            rayLength1D.z += rayUnitStepSize.z;
+        }
+
+        // Ensure it's within chunk bounds
+        if (mapCheck.x < 0 || mapCheck.x >= CHUNK_SIZE_X ||
+            mapCheck.y < 0 || mapCheck.y >= CHUNK_SIZE_Y ||
+            mapCheck.z < 0 || mapCheck.z >= CHUNK_SIZE_Z) {
+            return (RaycastHit){ .hit = FALSE };
+        }
+
+        // Get block at position
+        int index = (mapCheck.y * CHUNK_SIZE_X * CHUNK_SIZE_Z) + (mapCheck.z * CHUNK_SIZE_X) + mapCheck.x;
+    
+        if (chunk->blockTypeArr[index] != 0) {
+            return (RaycastHit){
+                .hit = true,
+                .blockPos = mapCheck,
+                .index = index,
+            };
+        }
+
+    }
+
+    return (RaycastHit){ .hit = FALSE };
 }

@@ -52,7 +52,7 @@ typedef long double f10;
 // 8 btye / 64 bit size value
 // Use only for representing size as bytes not as value count
 // u8[3] size is 8 * 3 = 24 bytes
-typedef u8 size;
+// typedef u8 size_t;
 
 // 8 btye / 64 bit count value
 // use only for representing count of values

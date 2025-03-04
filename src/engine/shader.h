@@ -11,15 +11,15 @@ struct ShaderAttribute{
     index_t location;
     GLenum type;
     Bool normalized;
-    size stride;
-    size offset;
+    size_t stride;
+    size_t offset;
 };
 
 struct ShaderUniform{
     // TODO change this with custom string
     char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
     GLenum type;
-    size size;
+    size_t size;
 };
 
 struct Shader{

@@ -54,8 +54,8 @@ struct Result windowCreate(int width, int height, const char *title, struct Wind
         return mErr("Failed to initialize GLFW");
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     GLFWwindow *test = glfwCreateWindow(width, height, title, NULL, NULL);
     dest->windowHandle = test;
@@ -64,7 +64,6 @@ struct Result windowCreate(int width, int height, const char *title, struct Wind
         // Dont forget to terminate glfw and free the title before using mErr
         return mErr("Failed to create GLFW window");
     }
-    mDebug("windows is after %p", dest->windowHandle);
 
     glfwMakeContextCurrent(dest->windowHandle);
     glfwSetFramebufferSizeCallback(dest->windowHandle, framebuffer_size_callback);
@@ -134,6 +133,10 @@ Bool windowGetKey(struct Window *window, enum InputKey key)
         return glfwGetKey(window->windowHandle, GLFW_KEY_ESCAPE) == GLFW_PRESS;
     case KEY_LEFT_SHIFT:
         return glfwGetKey(window->windowHandle, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+    case MOUSE_LEFT:
+        return glfwGetMouseButton(window->windowHandle, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+    case MOUSE_RIGHT:
+        return glfwGetMouseButton(window->windowHandle, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
     default:
         return FALSE;
     }

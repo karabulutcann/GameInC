@@ -1,5 +1,4 @@
 #include "input.h"
-#include <cglm/cglm.h>
 
 struct InputKeyState
 {
@@ -47,6 +46,8 @@ void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera)
     {
         camera->movementSpeed = 5.0f;
     }
+
+
 
     const f4 cameraSpeed = camera->movementSpeed * deltaTime; // adjust accordingly
     if (windowGetKey(window, KEY_SPACE) == KEY_DOWN)

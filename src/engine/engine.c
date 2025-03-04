@@ -1,6 +1,5 @@
 #include "engine.h"
 #include "core/log.h"
-#include <stb_image.h>
 
 const float clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -141,13 +140,13 @@ struct Result cubeDefferedRendererDestroy(struct CubeDefferedRenderer *self)
 
 struct Result engineCreate(struct Engine *dest)
 {
-    windowCreate(1280, 720, "ENGINE", &dest->window);
+    windowCreate(1200, 800, "Demo", &dest->window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         return mErr("Failed to initialize GLAD");
     }
-
+    glViewport(0, 0, dest->window.width, dest->window.height);
     glEnable(GL_DEPTH_TEST);
     // glEnable(GL_CULL_FACE);
 

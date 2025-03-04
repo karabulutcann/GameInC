@@ -5,8 +5,8 @@ struct ShaderBufferBinding{
     count_t valueCount;
     GLenum type;
     GLboolean normalized;
-    size stride;
-    size offset;
+    size_t stride;
+    size_t offset;
 };
 
 

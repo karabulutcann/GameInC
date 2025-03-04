@@ -3,9 +3,6 @@
 #include "window.h"
 #include "shader.h"
 
-
-
-
 struct CubeDefferedRenderer {
     struct Shader geometryPass;
     struct Shader lightingPass;

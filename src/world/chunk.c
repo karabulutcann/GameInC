@@ -1,7 +1,5 @@
-#include "core/core.h"
 #include "chunk.h"
 #include "core/log.h"
-#include "cglm/cglm.h"
 #include "memory.h"
 
 #define FNL_IMPL
@@ -78,6 +76,7 @@ void chunkInitVbo(struct Chunk *self)
     glBindBuffer(GL_ARRAY_BUFFER, self->vertexBufferObject);
     glBufferData(GL_ARRAY_BUFFER, self->vertexCount * sizeof(float), self->mesh, GL_STATIC_DRAW);
 }
+
 
 void chunkDestroy(struct Chunk *chunk)
 {

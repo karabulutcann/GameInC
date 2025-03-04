@@ -6,6 +6,9 @@
 // 10 dan fazla iken zorlaniyo
 #define WORLD_SIZE_X 60
 
+
+#define cubeSize 0.4f
+
 struct World
 {
     ChunkTable chunkTable;

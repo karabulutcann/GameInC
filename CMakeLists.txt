@@ -11,6 +11,7 @@ set(GLAD_FILE "lib/glad/glad.c")
 # Include directories
 include_directories("include" "src")
 
+
 # Add FreeType as a subdirectory if building from source (adjust path as needed)
 
 # Add executable

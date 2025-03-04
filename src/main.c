@@ -1,9 +1,7 @@
+// thread windows headerlerini includeladiginden opengl we glfw den once importla obur turlu macrolar cakisiyor
+// #include "core/thread.h"
 #include "core/core.h"
 #include "engine/window.h"
-#include <math.h>
-#include <cglm/cglm.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "core/log.h"
 #include "core/result.h"
 #include "engine/shader.h"
@@ -11,8 +9,65 @@
 #include "world/world.h"
 #include "engine/engine.h"
 #include "input.h"
-#include "core/thread.h"
-#include <cglm/call.h>
+#include <math.h>
+#include <cglm/cglm.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_IMPLEMENTATION
+#define NK_GLFW_GL4_IMPLEMENTATION
+#define NK_KEYSTATE_BASED_INPUT
+#include <nuklear.h>
+#include <nuklear_glfw_gl4.h>
+
+#define WINDOW_WIDTH 1200
+#define WINDOW_HEIGHT 800
+
+#define MAX_VERTEX_BUFFER 512 * 1024
+#define MAX_ELEMENT_BUFFER 128 * 1024
+
+/*#define INCLUDE_ALL */
+/*#define INCLUDE_STYLE */
+/*#define INCLUDE_CALCULATOR */
+/*#define INCLUDE_CANVAS */
+#define INCLUDE_OVERVIEW
+/*#define INCLUDE_CONFIGURATOR */
+/*#define INCLUDE_NODE_EDITOR */
+
+// #ifdef INCLUDE_ALL
+// #define INCLUDE_STYLE
+// #define INCLUDE_CALCULATOR
+// #define INCLUDE_CANVAS
+// #define INCLUDE_OVERVIEW
+// #define INCLUDE_CONFIGURATOR
+// #define INCLUDE_NODE_EDITOR
+// #endif
+
+#ifdef INCLUDE_STYLE
+#include "../../demo/common/style.c"
+#endif
+#ifdef INCLUDE_CALCULATOR
+#include "../../demo/common/calculator.c"
+#endif
+#ifdef INCLUDE_CANVAS
+#include "../../demo/common/canvas.c"
+#endif
+#ifdef INCLUDE_OVERVIEW
+#include <overview.c>
+#endif
+#ifdef INCLUDE_CONFIGURATOR
+#include "../../demo/common/style_configurator.c"
+#endif
+#ifdef INCLUDE_NODE_EDITOR
+#include "../../demo/common/node_editor.c"
+#endif
 
 volatile struct Camera camera;
 
@@ -58,6 +113,23 @@ void loadChunksAroundPlayer(struct World *world, struct Camera *camera)
             }
         }
     }
+
+    // for (int x = (-LOAD_RADIUS / 2); x <= (LOAD_RADIUS / 2); x++)
+    // {
+    //     for (int z = (-LOAD_RADIUS / 2); z <= (LOAD_RADIUS / 2); z++)
+    //     {
+    //         i4 chunkCoords[2] = {playerChunk[0] + x, playerChunk[1] + z};
+
+    //         // Check if the chunk is already loaded
+    //         struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkCoords);
+    //         if (chunk == NULL)
+    //         {
+    //             // Load the chunk
+    //             // worldLoadChunk(world, chunkCoords);
+    //             worldGenerateChunkMesh(world, chunkCoords);
+    //         }
+    //     }
+    // }
 }
 
 void unloadChunks(struct World *world, struct Camera *camera)
@@ -80,29 +152,79 @@ void unloadChunks(struct World *world, struct Camera *camera)
     }
 }
 
-mThreadCreateFunc(threadFunction, threadData, {
-    struct Mutex *mutex = threadData->mutex;
-    struct World *world = (struct World*)mutex->sharedState;
+// mThreadCreateFunc(threadFunction, threadData, {
+//     struct Mutex *mutex = threadData->mutex;
+//     struct World *world = (struct World *)mutex->sharedState;
 
-    while (!threadShouldClose)
-    {
-        loadChunksAroundPlayer(world, &camera);
-        unloadChunks(world, &camera);
-    }
+//     while (!threadShouldClose)
+//     {
+//         loadChunksAroundPlayer(world, &camera);
+//         unloadChunks(world, &camera);
+//     }
 
-    return 0;
-})
+//     return 0;
+// })
+
+static void error_callback(int e, const char *d)
+{
+    printf("Error %d: %s\n", e, d);
+}
 
 int main()
 {
-    struct ThreadManager threadManager = {0};
-    threadManagerCreate(&threadManager);
+
+    // struct ThreadManager threadManager = {0};
+    // threadManagerCreate(&threadManager);
 
     struct Engine engine = {0};
     engineCreate(&engine);
 
+    int width = 0, height = 0;
+    struct nk_context *ctx;
+    struct nk_colorf bg;
+    struct nk_image img;
+
+#ifdef INCLUDE_CONFIGURATOR
+    static struct nk_color color_table[NK_COLOR_COUNT];
+    memcpy(color_table, nk_default_color_style, sizeof(color_table));
+#endif
+
+    ctx = nk_glfw3_init(engine.window.windowHandle, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+    {
+        struct nk_font_atlas *atlas;
+        nk_glfw3_font_stash_begin(&atlas);
+        /*struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);*/
+        /*struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 14, 0);*/
+        /*struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);*/
+        /*struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);*/
+        /*struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);*/
+        /*struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);*/
+        nk_glfw3_font_stash_end();
+        /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
+        /*nk_style_set_font(ctx, &droid->handle);*/
+    }
+
+    /* Create bindless texture.
+     * The index returned is not the opengl resource id.
+     * IF you need the GL resource id use: nk_glfw3_get_tex_ogl_id() */
+    {
+        int tex_index = 0;
+        enum
+        {
+            tex_width = 256,
+            tex_height = 256
+        };
+        char pixels[tex_width * tex_height * 4];
+        memset(pixels, 128, sizeof(pixels));
+        tex_index = nk_glfw3_create_texture(pixels, tex_width, tex_height);
+        img = nk_image_id(tex_index);
+    }
+
+    bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+
     struct Shader chunkShader = {0};
     struct Shader lightingShader = {0};
+
     shaderCreate("shaders/g_buffer_vertex.glsl", "shaders/g_buffer_fragment.glsl", NULL, &chunkShader);
     shaderCreateTexture(&chunkShader, "assets/textures/texture_atlas.png", "textureAtlas");
     shaderCreate("shaders/deffered_vertex.glsl", "shaders/deffered_fragment.glsl", NULL, &lightingShader);
@@ -149,17 +271,16 @@ int main()
     struct World world = {0};
     worldCreate(&world);
 
+    struct Chunk chunk = {0};
+    chunkCreate((i4[2]){0, 0}, &chunk);
+    chunkTableInsert(world.chunkTable, (i4[2]){0, 0}, chunk);
+    worldGenerateChunkMesh(&world, (i4[2]){0, 0});
 
-    // struct Chunk chunk = {0};
-    // chunkCreate((i4[2]){0,0}, &chunk);
-    // chunkTableInsert(world.chunkTable, (i4[2]){0,0}, chunk);
-    // worldGenerateChunkMesh(&world, (i4[2]){0,0});
+    // // struct Mutex worldMutex = {0};
+    // // InitializeCriticalSection(&worldMutex.critSection);
+    // // worldMutex.sharedState = &world;
 
-    struct Mutex worldMutex = {0};
-    InitializeCriticalSection(&worldMutex.critSection);
-    worldMutex.sharedState = &world;
-
-    threadManagerSpawnThread(&threadManager, &worldMutex, threadFunction);
+    // // threadManagerSpawnThread(&threadManager, &worldMutex, threadFunction);
 
     CACHE_RESULT(mCameraCreate(&camera));
 
@@ -202,10 +323,6 @@ int main()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     glBindVertexArray(0);
 
-    // shaderLightingPass.use();
-    // shaderLightingPass.setInt("gPosition", 0);
-    // shaderLightingPass.setInt("gNormal", 1);
-    // shaderLightingPass.setInt("gAlbedoSpec", 2);
     shaderUse(&lightingShader);
     shaderSetInt(&lightingShader, "gPosition", 0);
     shaderSetInt(&lightingShader, "gNormal", 1);
@@ -213,7 +330,8 @@ int main()
 
     while (!windowShouldClose(&engine.window))
     {
-        mat4 projection = GLM_MAT4_IDENTITY_INIT; 
+
+        mat4 projection = GLM_MAT4_IDENTITY_INIT;
         glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 300.0f, projection);
 
         mat4 view = GLM_MAT4_IDENTITY_INIT;
@@ -234,7 +352,7 @@ int main()
         shaderSetMat4(&chunkShader, "model", model);
 
         i4 playerChunk[2];
-        getPlayerChunkCoords(&camera, playerChunk); 
+        getPlayerChunkCoords(&camera, playerChunk);
 
         for (i4 x = (i4)(-LOAD_RADIUS / 2); x <= (i4)(LOAD_RADIUS / 2); x++)
         {
@@ -273,41 +391,9 @@ int main()
             }
         }
 
-        // struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0,0});
-        // if (chunk == NULL || chunk->isLoading == TRUE || chunk->mesh == NULL)
-        // {
-        //     continue;
-        // }
-
-        // if (chunk->isVboCreated == FALSE)
-        // {
-        //     chunkInitVbo(chunk);
-        //     chunk->isVboCreated = TRUE;
-        // }
-        // glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
-        // shaderSetUniformMat4(&chunkShader, "model", model);
-
-        // TODO bunu burda yapma vertex buffer object baglanmadan calismiyor
-        // glNamedBuffer foksiyonlarini kullan
-
-        // glBindVertexArray(chunkShader.vertexArrayObject);
-        // glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
-
-        // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0); 
- 
-        // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-
-        // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-
-        // glEnableVertexAttribArray(0);
-        // glEnableVertexAttribArray(1);
-        // glEnableVertexAttribArray(2);
-
-        // glDrawArrays(GL_TRIANGLES, 0, chunk->vertexCount);
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // shaderLightingPass.use();
+
         shaderUse(&lightingShader);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -316,18 +402,6 @@ int main()
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
 
-        // send light relevant uniforms
-        // for (unsigned int i = 0; i < lightPositions.size(); i++)
-        // {
-        //     shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
-        //     shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lightColors[i]);
-        //     // update attenuation parameters and calculate radius
-        //     const float linear = 0.7f;
-        //     const float quadratic = 1.8f;
-        //     shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Linear", linear);
-        //     shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].Quadratic", quadratic);
-        // }
-        // shaderLightingPass.setVec3("viewPos", camera.Position);
         shaderSetVec3(&lightingShader, "viewPos", camera.position);
         shaderSetVec3(&lightingShader, "lights[0].Position", (vec3){-0.2f, -1.0f, -0.3f});
         shaderSetVec3(&lightingShader, "lights[0].Color", (vec3){1.0f, 1.0f, 1.0f});
@@ -350,14 +424,98 @@ int main()
         //  glBlitFramebuffer(0, 0, engine.window.width, engine.window.height, 0, 0, engine.window.width, engine.window.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        nk_glfw3_new_frame();
+
+        /* GUI */
+        if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
+                     NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
+                         NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+        {
+            enum
+            {
+                EASY,
+                HARD
+            };
+            static int op = EASY;
+            static int property = 20;
+            nk_layout_row_static(ctx, 30, 80, 1);
+            if (nk_button_label(ctx, "button"))
+                fprintf(stdout, "button pressed\n");
+
+            nk_layout_row_dynamic(ctx, 30, 2);
+            if (nk_option_label(ctx, "easy", op == EASY))
+                op = EASY;
+            if (nk_option_label(ctx, "hard", op == HARD))
+                op = HARD;
+
+            nk_layout_row_dynamic(ctx, 25, 1);
+            nk_property_int(ctx, "Compression:", 0, &property, 100, 10, 1);
+
+            nk_layout_row_dynamic(ctx, 20, 1);
+            nk_label(ctx, "background:", NK_TEXT_LEFT);
+            nk_layout_row_dynamic(ctx, 25, 1);
+            if (nk_combo_begin_color(ctx, nk_rgb_cf(bg), nk_vec2(nk_widget_width(ctx), 400)))
+            {
+                nk_layout_row_dynamic(ctx, 120, 1);
+                bg = nk_color_picker(ctx, bg, NK_RGBA);
+                nk_layout_row_dynamic(ctx, 25, 1);
+                bg.r = nk_propertyf(ctx, "#R:", 0, bg.r, 1.0f, 0.01f, 0.005f);
+                bg.g = nk_propertyf(ctx, "#G:", 0, bg.g, 1.0f, 0.01f, 0.005f);
+                bg.b = nk_propertyf(ctx, "#B:", 0, bg.b, 1.0f, 0.01f, 0.005f);
+                bg.a = nk_propertyf(ctx, "#A:", 0, bg.a, 1.0f, 0.01f, 0.005f);
+                nk_combo_end(ctx);
+            }
+        }
+        nk_end(ctx);
+
+        /* Bindless Texture */
+        if (nk_begin(ctx, "Texture", nk_rect(250, 150, 230, 250),
+                     NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
+                         NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+        {
+            struct nk_command_buffer *canvas = nk_window_get_canvas(ctx);
+            struct nk_rect total_space = nk_window_get_content_region(ctx);
+            nk_draw_image(canvas, total_space, &img, nk_white);
+        }
+        nk_end(ctx);
+
+/* -------------- EXAMPLES ---------------- */
+#ifdef INCLUDE_CALCULATOR
+        calculator(ctx);
+#endif
+#ifdef INCLUDE_CANVAS
+        canvas(ctx);
+#endif
+#ifdef INCLUDE_OVERVIEW
+        overview(ctx);
+#endif
+#ifdef INCLUDE_CONFIGURATOR
+        style_configurator(ctx, color_table);
+#endif
+#ifdef INCLUDE_NODE_EDITOR
+        node_editor(ctx);
+#endif
+        /* ----------------------------------------- */
+
+        /* Draw */
+        // glViewport(0, 0, engine.window.width, engine.window.height);
+        // glClear(GL_COLOR_BUFFER_BIT);
+        // glClearColor(bg.r, bg.g, bg.b, bg.a);
+        /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state
+         * with blending, scissor, face culling, depth test and viewport and
+         * defaults everything back into a default state.
+         * Make sure to either a.) save and restore or b.) reset your own state after
+         * rendering the UI. */
+        nk_glfw3_render(NK_ANTI_ALIASING_ON);
+
         windowSwapBuffers(&engine.window);
     }
 
-    threadShouldClose = TRUE;
+    // threadShouldClose = TRUE;
 
-    threadManagerWaitForAll(&threadManager, INFINITE);
+    // threadManagerWaitForAll(&threadManager, INFINITE);
 
-    threadManagerDestroy(&threadManager);
+    // threadManagerDestroy(&threadManager);
 
     mDebug("World destroy");
     worldDestroy(&world);
@@ -365,10 +523,28 @@ int main()
     mDebug("Shader destroy");
     shaderDestroy(&chunkShader);
 
+    mDebug("Shader destroy");
+    shaderDestroy(&lightingShader);
+
     mDebug("Engine destroy");
     engineDestroy(&engine);
+
+    nk_glfw3_shutdown();
     return 0;
 }
+
+// if (windowGetKey(&engine.window, MOUSE_LEFT) == KEY_DOWN)
+// {
+//     struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
+//     RaycastHit hit = RaycastBlock(camera.position, camera.front, chunk);
+//     if (hit.hit)
+//     {
+//         mDebug("hit to %d\n", hit.index);
+//         chunk->blockTypeArr[hit.index] = 0;
+//         worldGenerateChunkMesh(&world, (i4[2]){0, 0});
+//         glNamedBufferData(chunk->vertexBufferObject, chunk->vertexCount * sizeof(float), chunk->mesh, GL_STATIC_DRAW);
+//     }
+// }
 
 // float tangents[12 * 3] = {0};
 // float bitangents[12 * 3] = {0};

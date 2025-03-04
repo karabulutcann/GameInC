@@ -21,7 +21,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${GLAD_FILE})
 target_link_directories(${PROJECT_NAME} PRIVATE ../lib/GLFW)
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} glfw3_mt msvcrtd libcmtd user32 kernel32 gdi32 shell32)
+target_link_libraries(${PROJECT_NAME} glfw3_mt)
 
 # Define debug flags
 target_compile_definitions(${PROJECT_NAME} PRIVATE _DEBUG)

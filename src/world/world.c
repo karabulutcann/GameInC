@@ -2,58 +2,59 @@
 #include "core/log.h"
 #include <memory.h>
 
-#define size 0.2f
-#define cubeSize 0.4f
 #define textureAtlasSize 4
+
+
+#define sizeVertex 0.2f
 
 const float cubeVertices[] = {
     // Back face
-    -size, -size, -size, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom left
-    size, size, -size, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top right
-    size, -size, -size, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,  // bottom right
-    size, size, -size, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top right
-    -size, -size, -size, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom left
-    -size, size, -size, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,  // top left
+    -sizeVertex, -sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom left
+    sizeVertex, sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top right
+    sizeVertex, -sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,  // bottom right
+    sizeVertex, sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top right
+    -sizeVertex, -sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom left
+    -sizeVertex, sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,  // top left
 
     // front face
-    -size, -size, size, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-    size, -size, size, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom right
-    size, size, size, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top right
-    size, size, size, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top right
-    -size, size, size, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top left
-    -size, -size, size, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+    -sizeVertex, -sizeVertex, sizeVertex, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+    sizeVertex, -sizeVertex, sizeVertex, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom right
+    sizeVertex, sizeVertex, sizeVertex, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top right
+    sizeVertex, sizeVertex, sizeVertex, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top right
+    -sizeVertex, sizeVertex, sizeVertex, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top left
+    -sizeVertex, -sizeVertex, sizeVertex, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
 
     // left face
-    -size, size, size, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top-right
-    -size, size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // top-left
-    -size, -size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
-    -size, -size, -size, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
-    -size, -size, size, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // bottom-right
-    -size, size, size, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top-right
+    -sizeVertex, sizeVertex, sizeVertex, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top-right
+    -sizeVertex, sizeVertex, -sizeVertex, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  // top-left
+    -sizeVertex, -sizeVertex, -sizeVertex, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+    -sizeVertex, -sizeVertex, -sizeVertex, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // bottom-left
+    -sizeVertex, -sizeVertex, sizeVertex, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  // bottom-right
+    -sizeVertex, sizeVertex, sizeVertex, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,   // top-right
 
     // right face
-    size, size, size, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // top-left
-    size, -size, -size, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-    size, size, -size, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-right
-    size, -size, -size, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-    size, size, size, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // top-left
-    size, -size, size, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
+    sizeVertex, sizeVertex, sizeVertex, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // top-left
+    sizeVertex, -sizeVertex, -sizeVertex, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+    sizeVertex, sizeVertex, -sizeVertex, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-right
+    sizeVertex, -sizeVertex, -sizeVertex, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-right
+    sizeVertex, sizeVertex, sizeVertex, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // top-left
+    sizeVertex, -sizeVertex, sizeVertex, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 
     // bottom face
-    -size, -size, -size, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-    size, -size, -size, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // top-left
-    size, -size, size, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
-    size, -size, size, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
-    -size, -size, size, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
-    -size, -size, -size, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+    -sizeVertex, -sizeVertex, -sizeVertex, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+    sizeVertex, -sizeVertex, -sizeVertex, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // top-left
+    sizeVertex, -sizeVertex, sizeVertex, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
+    sizeVertex, -sizeVertex, sizeVertex, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
+    -sizeVertex, -sizeVertex, sizeVertex, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+    -sizeVertex, -sizeVertex, -sizeVertex, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
 
     // top face
-    -size, size, -size, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-    size, size, size, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
-    size, size, -size, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  // top-right
-    size, size, size, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
-    -size, size, -size, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-    -size, size, size, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
+    -sizeVertex, sizeVertex, -sizeVertex, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+    sizeVertex, sizeVertex, sizeVertex, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
+    sizeVertex, sizeVertex, -sizeVertex, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  // top-right
+    sizeVertex, sizeVertex, sizeVertex, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
+    -sizeVertex, sizeVertex, -sizeVertex, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+    -sizeVertex, sizeVertex, sizeVertex, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 };
 
 enum BlockType
@@ -107,6 +108,18 @@ void worldUnloadChunk(struct World *self, i4 chunkPos[2])
     chunk->isLoading = TRUE;
     chunkTableRemove(self->chunkTable, chunkPos);
     memset(chunk, 0, sizeof(struct Chunk));
+}
+
+void worldGetBlock(struct World *self, i4 chunkPos[2], i4 blockPos[3], u4 *blockType)
+{
+    struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
+    if (chunk == NULL)
+    {
+        return;
+    }
+
+    i4 index = (blockPos[1] * CHUNK_SIZE_X * CHUNK_SIZE_Z) + (blockPos[2] * CHUNK_SIZE_X) + blockPos[0];
+    *blockType = chunk->blockTypeArr[index];
 }
 
 void worldGetBlockNeighbors(struct World *self, index_t i, struct Chunk currentChunk, i4 chunkCoords[2], u4 blockCoords[3], char neighborTypes[6])
