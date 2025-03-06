@@ -11,6 +11,67 @@ float quadVertices[] = {
     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
 };
 
+#define sizeVertex 0.2f
+
+const float cubeHighlightVertices[] = {
+     // Back face
+     -sizeVertex, -sizeVertex, -sizeVertex,  // bottom left
+     sizeVertex, -sizeVertex, -sizeVertex,   // bottom right
+     sizeVertex, sizeVertex, -sizeVertex,    // top right
+     -sizeVertex, sizeVertex, -sizeVertex,   // top left
+ 
+     // Front face
+     -sizeVertex, -sizeVertex, sizeVertex,   // bottom left
+     sizeVertex, -sizeVertex, sizeVertex,    // bottom right
+     sizeVertex, sizeVertex, sizeVertex,     // top right
+     -sizeVertex, sizeVertex, sizeVertex,    // top left
+ 
+     // Left face
+     -sizeVertex, sizeVertex, sizeVertex,    // top-right
+     -sizeVertex, sizeVertex, -sizeVertex,   // top-left
+     -sizeVertex, -sizeVertex, -sizeVertex,  // bottom-left
+     -sizeVertex, -sizeVertex, sizeVertex,   // bottom-right
+ 
+     // Right face
+     sizeVertex, sizeVertex, sizeVertex,     // top-left
+     sizeVertex, -sizeVertex, sizeVertex,    // bottom-left
+     sizeVertex, -sizeVertex, -sizeVertex,   // bottom-right
+     sizeVertex, sizeVertex, -sizeVertex,    // top-right
+ 
+     // Bottom face
+     -sizeVertex, -sizeVertex, -sizeVertex,  // top-right
+     sizeVertex, -sizeVertex, -sizeVertex,   // top-left
+     sizeVertex, -sizeVertex, sizeVertex,    // bottom-left
+     -sizeVertex, -sizeVertex, sizeVertex,   // bottom-right
+ 
+     // Top face
+     -sizeVertex, sizeVertex, -sizeVertex,   // top-left
+     sizeVertex, sizeVertex, -sizeVertex,    // top-right
+     sizeVertex, sizeVertex, sizeVertex,     // bottom-right
+     -sizeVertex, sizeVertex, sizeVertex,    // bottom-left
+};
+
+GLuint cubeHighlightIndices[] = {
+    // Back face
+    0, 1,
+    1, 2,
+    2, 3,
+    3, 0,
+
+    // Front face
+    4, 5,
+    5, 6,
+    6, 7,
+    7, 4,
+
+    // Left face
+    0, 4,
+    1, 5,
+    2, 6,
+    3, 7
+};
+
+
 struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDefferedRenderer *dest)
 {
     shaderCreate("shaders/g_buffer_vertex.glsl", "shaders/g_buffer_fragment.glsl", NULL, &dest->geometryPass);
@@ -138,9 +199,48 @@ struct Result cubeDefferedRendererDestroy(struct CubeDefferedRenderer *self)
     return ok();
 }
 
+struct Result cubeHighlightRendererCreate(struct Engine engine, struct CubeHighlightRenderer *dest)
+{
+    shaderCreate("shaders/highlight_vertex.glsl", "shaders/highlight_fragment.glsl", NULL, &dest->highlightPass);
+    glCreateBuffers(1, &dest->VBO);
+    glCreateBuffers(1, &dest->EBO);
+    glNamedBufferData(dest->EBO, sizeof(cubeHighlightIndices), cubeHighlightIndices, GL_STATIC_DRAW);
+    glNamedBufferData(dest->VBO, sizeof(cubeHighlightVertices), cubeHighlightVertices, GL_STATIC_DRAW);
+    shaderBindBuffers(&dest->highlightPass, 1, (struct ShaderBufferBinding[]){
+        {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 3, .offset = 0}},
+    dest->VBO);
+    glLineWidth(2);
+}
+
+struct Result cubeHighlightRendererUpdate(struct CubeHighlightRenderer *self, mat4 projection, mat4 view, i4 chunkPos[2] ,i4 blockPos[3])
+{
+
+    shaderUse(&self->highlightPass);
+    shaderSetMat4(&self->highlightPass, "projection", projection);
+    shaderSetMat4(&self->highlightPass, "view", view);
+    mat4 model = GLM_MAT4_IDENTITY_INIT;
+    glm_translate(model, (vec3){(chunkPos[0] * cubeSize * CHUNK_SIZE_X) + (blockPos[0] * cubeSize) , (blockPos[1] * cubeSize)  , chunkPos[1] * cubeSize * CHUNK_SIZE_Z + (blockPos[2] * cubeSize)});
+    shaderSetMat4(&self->highlightPass, "model", model);
+
+    // geometry pass
+    glBindVertexArray(self->highlightPass.vertexArrayObject);
+    glBindBuffer(GL_ARRAY_BUFFER, self->VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->EBO);
+
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+    return ok();
+}
+
+struct Result cubeHighlightRendererDestroy(struct CubeHighlightRenderer *self)
+{
+    glDeleteBuffers(1, &self->VBO);	
+    shaderDestroy(&self->highlightPass);
+    return ok();
+}
+
 struct Result engineCreate(struct Engine *dest)
 {
-    windowCreate(1200, 800, "Demo", &dest->window);
+    windowCreate(1280, 720, "Engine", &dest->window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -151,6 +251,7 @@ struct Result engineCreate(struct Engine *dest)
     // glEnable(GL_CULL_FACE);
 
     // cubeDefferedRendererCreate(*dest, &dest->cubeDefferedRenderer);
+    cubeHighlightRendererCreate(*dest, &dest->cubeHighlightRenderer);
 
     return ok();
 }
@@ -172,6 +273,7 @@ struct Result engineUpdate(struct Engine *self, mat4 projection, mat4 view)
     // glClearColor(0.5568f, 0.7019f, 1.0f, 1.0f);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 
     // cubeDefferedRendererUpdate(&self->cubeDefferedRenderer, projection, view);
 

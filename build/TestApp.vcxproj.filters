@@ -10,6 +10,9 @@
     <ClCompile Include="C:\code\engine\src\core\file.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\job.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\code\engine\src\core\log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -28,9 +31,6 @@
     <ClCompile Include="C:\code\engine\src\core\thread.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\code\engine\src\core\worker.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="C:\code\engine\src\engine\engine.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -46,6 +46,9 @@
     <ClCompile Include="C:\code\engine\src\engine\window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\code\engine\src\gui\gui.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\code\engine\src\input.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,6 +56,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\code\engine\src\world\chunk.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\world\chunk_generator.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\code\engine\src\world\world.c">

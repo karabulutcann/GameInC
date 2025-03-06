@@ -3,12 +3,6 @@
 #include "core/result.h"
 #include <cglm/cglm.h>
 
-#define CHUNK_SIZE_X 16
-#define CHUNK_SIZE_Y 32
-#define CHUNK_SIZE_Z 16
-
-#define CUBE_VERTEX_SIZE 8
-
 struct Chunk{
     i4 position[2];
     Bool isVboCreated;

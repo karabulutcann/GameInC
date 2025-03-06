@@ -24,8 +24,8 @@
 #define NK_IMPLEMENTATION
 #define NK_GLFW_GL4_IMPLEMENTATION
 #define NK_KEYSTATE_BASED_INPUT
-#include <nuklear.h>
-#include <nuklear_glfw_gl4.h>
+#include <nuklear/nuklear.h>
+#include <nuklear/nuklear_glfw_gl4.h>
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -33,41 +33,8 @@
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
-/*#define INCLUDE_ALL */
-/*#define INCLUDE_STYLE */
-/*#define INCLUDE_CALCULATOR */
-/*#define INCLUDE_CANVAS */
 #define INCLUDE_OVERVIEW
-/*#define INCLUDE_CONFIGURATOR */
-/*#define INCLUDE_NODE_EDITOR */
-
-// #ifdef INCLUDE_ALL
-// #define INCLUDE_STYLE
-// #define INCLUDE_CALCULATOR
-// #define INCLUDE_CANVAS
-// #define INCLUDE_OVERVIEW
-// #define INCLUDE_CONFIGURATOR
-// #define INCLUDE_NODE_EDITOR
-// #endif
-
-#ifdef INCLUDE_STYLE
-#include "../../demo/common/style.c"
-#endif
-#ifdef INCLUDE_CALCULATOR
-#include "../../demo/common/calculator.c"
-#endif
-#ifdef INCLUDE_CANVAS
-#include "../../demo/common/canvas.c"
-#endif
-#ifdef INCLUDE_OVERVIEW
-#include <overview.c>
-#endif
-#ifdef INCLUDE_CONFIGURATOR
-#include "../../demo/common/style_configurator.c"
-#endif
-#ifdef INCLUDE_NODE_EDITOR
-#include "../../demo/common/node_editor.c"
-#endif
+#include <nuklear/overview.c>
 
 volatile struct Camera camera;
 
@@ -165,11 +132,6 @@ void unloadChunks(struct World *world, struct Camera *camera)
 //     return 0;
 // })
 
-static void error_callback(int e, const char *d)
-{
-    printf("Error %d: %s\n", e, d);
-}
-
 int main()
 {
 
@@ -193,32 +155,20 @@ int main()
     {
         struct nk_font_atlas *atlas;
         nk_glfw3_font_stash_begin(&atlas);
-        /*struct nk_font *droid = nk_font_atlas_add_from_file(atlas, "../../../extra_font/DroidSans.ttf", 14, 0);*/
-        /*struct nk_font *roboto = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Roboto-Regular.ttf", 14, 0);*/
-        /*struct nk_font *future = nk_font_atlas_add_from_file(atlas, "../../../extra_font/kenvector_future_thin.ttf", 13, 0);*/
-        /*struct nk_font *clean = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyClean.ttf", 12, 0);*/
-        /*struct nk_font *tiny = nk_font_atlas_add_from_file(atlas, "../../../extra_font/ProggyTiny.ttf", 10, 0);*/
-        /*struct nk_font *cousine = nk_font_atlas_add_from_file(atlas, "../../../extra_font/Cousine-Regular.ttf", 13, 0);*/
+        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/DroidSans.ttf", 14, 0);
+        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/Roboto-Regular.ttf", 16, 0);
+        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/kenvector_future_thin.ttf", 13, 0);
+        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/ProggyClean.ttf", 16, 0);
+        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/ProggyTiny.ttf", 10, 0);
+        struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/Cousine-Regular.ttf", 13, 0);
         nk_glfw3_font_stash_end();
-        /*nk_style_load_all_cursors(ctx, atlas->cursors);*/
-        /*nk_style_set_font(ctx, &droid->handle);*/
+        nk_style_load_all_cursors(ctx, atlas->cursors);
+        nk_style_set_font(ctx, &font->handle);
     }
 
     /* Create bindless texture.
      * The index returned is not the opengl resource id.
      * IF you need the GL resource id use: nk_glfw3_get_tex_ogl_id() */
-    {
-        int tex_index = 0;
-        enum
-        {
-            tex_width = 256,
-            tex_height = 256
-        };
-        char pixels[tex_width * tex_height * 4];
-        memset(pixels, 128, sizeof(pixels));
-        tex_index = nk_glfw3_create_texture(pixels, tex_width, tex_height);
-        img = nk_image_id(tex_index);
-    }
 
     bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
 
@@ -331,6 +281,20 @@ int main()
     while (!windowShouldClose(&engine.window))
     {
 
+        struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
+        RaycastHit hit = RaycastBlock((vec3){camera.position[0] - 0.2f,camera.position[1] + 0.4f,camera.position[2]}, camera.front, chunk);
+
+        if (inputGetKeyPressedOnce(&engine.window, MOUSE_LEFT) && engine.window.isMouseLocked)
+        {
+            if (hit.hit)
+            {
+                mDebug("hit to %d\n", hit.index);
+                chunk->blockTypeArr[hit.index] = 0;
+                worldGenerateChunkMesh(&world, (i4[2]){0, 0});
+                glNamedBufferData(chunk->vertexBufferObject, chunk->vertexCount * sizeof(float), chunk->mesh, GL_STATIC_DRAW);
+            }
+        }
+
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
         glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 300.0f, projection);
 
@@ -414,15 +378,22 @@ int main()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
-        // glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
-        // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+
+        
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
         // // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
         // // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
         // // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
 
         // this is used for copying the depth buffer to the default framebuffer for rendering with forward rendering but it doesn't work fix it
         //  glBlitFramebuffer(0, 0, engine.window.width, engine.window.height, 0, 0, engine.window.width, engine.window.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        //  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        if(hit.hit){
+            glDisable(GL_DEPTH_TEST);
+            cubeHighlightRendererUpdate(&engine.cubeHighlightRenderer, projection, view, (i4[2]){0, 0}, (i4[3]){hit.blockPos.x, hit.blockPos.y, hit.blockPos.z});
+        }
 
         nk_glfw3_new_frame();
 
@@ -468,44 +439,11 @@ int main()
         }
         nk_end(ctx);
 
-        /* Bindless Texture */
-        if (nk_begin(ctx, "Texture", nk_rect(250, 150, 230, 250),
-                     NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
-                         NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-        {
-            struct nk_command_buffer *canvas = nk_window_get_canvas(ctx);
-            struct nk_rect total_space = nk_window_get_content_region(ctx);
-            nk_draw_image(canvas, total_space, &img, nk_white);
-        }
-        nk_end(ctx);
-
-/* -------------- EXAMPLES ---------------- */
-#ifdef INCLUDE_CALCULATOR
-        calculator(ctx);
-#endif
-#ifdef INCLUDE_CANVAS
-        canvas(ctx);
-#endif
 #ifdef INCLUDE_OVERVIEW
         overview(ctx);
 #endif
-#ifdef INCLUDE_CONFIGURATOR
-        style_configurator(ctx, color_table);
-#endif
-#ifdef INCLUDE_NODE_EDITOR
-        node_editor(ctx);
-#endif
         /* ----------------------------------------- */
 
-        /* Draw */
-        // glViewport(0, 0, engine.window.width, engine.window.height);
-        // glClear(GL_COLOR_BUFFER_BIT);
-        // glClearColor(bg.r, bg.g, bg.b, bg.a);
-        /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state
-         * with blending, scissor, face culling, depth test and viewport and
-         * defaults everything back into a default state.
-         * Make sure to either a.) save and restore or b.) reset your own state after
-         * rendering the UI. */
         nk_glfw3_render(NK_ANTI_ALIASING_ON);
 
         windowSwapBuffers(&engine.window);
@@ -532,19 +470,6 @@ int main()
     nk_glfw3_shutdown();
     return 0;
 }
-
-// if (windowGetKey(&engine.window, MOUSE_LEFT) == KEY_DOWN)
-// {
-//     struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
-//     RaycastHit hit = RaycastBlock(camera.position, camera.front, chunk);
-//     if (hit.hit)
-//     {
-//         mDebug("hit to %d\n", hit.index);
-//         chunk->blockTypeArr[hit.index] = 0;
-//         worldGenerateChunkMesh(&world, (i4[2]){0, 0});
-//         glNamedBufferData(chunk->vertexBufferObject, chunk->vertexCount * sizeof(float), chunk->mesh, GL_STATIC_DRAW);
-//     }
-// }
 
 // float tangents[12 * 3] = {0};
 // float bitangents[12 * 3] = {0};

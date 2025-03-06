@@ -17,7 +17,7 @@ enum InputKey
     MOUSE_RIGHT,
 };
 
-void inputProcess(struct Window* window, f4 deltaTime, struct Camera* camera);
+void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera);
 
 Bool inputGetKeyPressedOnce(struct Window *window, enum InputKey key);
 

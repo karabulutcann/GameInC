@@ -2,6 +2,14 @@
 #include "safe_strings.h"
 #include <glad/glad.h>
 
+#define CHUNK_SIZE_X 16
+#define CHUNK_SIZE_Y 32
+#define CHUNK_SIZE_Z 16
+
+#define CUBE_VERTEX_SIZE 8
+
+#define cubeSize 0.4f
+
 #define TRUE 1
 #define FALSE 0
 

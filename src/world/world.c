@@ -4,7 +4,6 @@
 
 #define textureAtlasSize 4
 
-
 #define sizeVertex 0.2f
 
 const float cubeVertices[] = {
@@ -57,29 +56,7 @@ const float cubeVertices[] = {
     -sizeVertex, sizeVertex, sizeVertex, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 };
 
-enum BlockType
-{
-    AIR,
-    DIRT,
-    STONE,
-    GRASS,
-    OAK_PLANK,
-    OAK_LOG,
-    CRAFTING_TABLE,
-    STONE_BRICK,
-    MOSSY_STONE_BRICK,
-    CRACKED_STONE_BRICK,
-};
 
-enum Face
-{
-    BACK,
-    FRONT,
-    LEFT,
-    RIGHT,
-    BOTTOM,
-    TOP
-};
 
 void worldCreate(struct World *dest)
 {
@@ -221,8 +198,6 @@ void worldGetBlockNeighbors(struct World *self, index_t i, struct Chunk currentC
     }
 }
 
-// TODO grass blocklarin yan yuzlerindeki texture ters duruyor duzelt
-// TODO texturelar bir sonraki texturlara tasiyor duzelt
 count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
 {
     memcpy(mesh, cubeVertices + face * CUBE_VERTEX_SIZE * 6, CUBE_VERTEX_SIZE * sizeof(float) * 6);

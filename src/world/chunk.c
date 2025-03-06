@@ -7,12 +7,9 @@
 
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 {
-
     memset(dest, 0, sizeof(struct Chunk));
-
     dest->position[0] = chunkPos[0];
     dest->position[1] = chunkPos[1];
-
     dest->blockTypeArr = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(u1));
     dest->mesh = NULL;
 

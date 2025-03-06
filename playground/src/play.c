@@ -22,8 +22,8 @@
 #define NK_IMPLEMENTATION
 #define NK_GLFW_GL4_IMPLEMENTATION
 #define NK_KEYSTATE_BASED_INPUT
-#include <nuklear.h>
-#include "nuklear_glfw_gl4.h"
+#include <nuklear/nuklear.h>
+#include <nuklear/nuklear_glfw_gl4.h>
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -38,11 +38,11 @@
  * ===============================================================*/
 /* This are some code examples to provide a small overview of what can be
  * done with this library. To try out an example uncomment the defines */
-/*#define INCLUDE_ALL */
+#define INCLUDE_ALL 
 /*#define INCLUDE_STYLE */
 /*#define INCLUDE_CALCULATOR */
 /*#define INCLUDE_CANVAS */
-#define INCLUDE_OVERVIEW
+// #define INCLUDE_OVERVIEW
 /*#define INCLUDE_CONFIGURATOR */
 /*#define INCLUDE_NODE_EDITOR */
 
@@ -56,22 +56,22 @@
 #endif
 
 #ifdef INCLUDE_STYLE
-#include "../../demo/common/style.c"
+#include <nuklear/style.c>
 #endif
 #ifdef INCLUDE_CALCULATOR
-#include "../../demo/common/calculator.c"
+#include <nuklear/calculator.c>
 #endif
 #ifdef INCLUDE_CANVAS
-#include "../../demo/common/canvas.c"
+#include <nuklear/canvas.c>
 #endif
 #ifdef INCLUDE_OVERVIEW
-#include "overview.c"
+#include <nuklear/overview.c>
 #endif
 #ifdef INCLUDE_CONFIGURATOR
-#include "../../demo/common/style_configurator.c"
+#include <nuklear/style_configurator.c>
 #endif
 #ifdef INCLUDE_NODE_EDITOR
-#include "../../demo/common/node_editor.c"
+#include <nuklear/node_editor.c>
 #endif
 
 /* ===============================================================

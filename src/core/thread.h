@@ -13,19 +13,21 @@
 struct Mutex
 {
     CRITICAL_SECTION critSection;
+    Bool isLocked;
     void *sharedState;
 };
 
 #define mMutexUse(mutex,data,dataType) \
     EnterCriticalSection(&mutex->critSection); \
+    mutex->isLocked = TRUE; \
     dataType* data = (dataType *)mutex->sharedState; \
-    for(u1 i = 0; i < 1;LeaveCriticalSection(&mutex->critSection), i++) 
+    for(u1 i = 0; i < 1;LeaveCriticalSection(&mutex->critSection),mutex->isLocked = FALSE , i++) 
 
 struct ThreadData
 {
     u4 threadId;
     HANDLE eventHandle;
-    struct Mutex *mutex;
+    void* data;
 };
 
 struct ThreadState

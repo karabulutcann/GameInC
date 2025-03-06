@@ -9,6 +9,7 @@ struct InputKeyState
     Bool keySpace;
     Bool keyESC;
     Bool keyLeftShift;
+    Bool mouseLeft;
 };
 
 static struct InputKeyState staticKeyState;
@@ -27,7 +28,7 @@ void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera)
         f4 ypos = windowGetMouseY(window);
         if (firstMouse && xpos != 0 && ypos != 0) // initially set to true
         {
-            lastX = xpos;
+            lastX = xpos; 
             lastY = ypos;
             firstMouse = FALSE;
         }
@@ -47,16 +48,14 @@ void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera)
         camera->movementSpeed = 5.0f;
     }
 
-
-
     const f4 cameraSpeed = camera->movementSpeed * deltaTime; // adjust accordingly
-    if (windowGetKey(window, KEY_SPACE) == KEY_DOWN)
-    {
-        windowSetShouldClose(window, TRUE);
-        // vec3 tmp = {0.0f, 0.0f, 0.0f};
-        // glm_vec3_scale(camera->up, cameraSpeed, tmp);
-        // glm_vec3_add(camera->position, tmp, camera->position);
-    }
+    // if (windowGetKey(window, KEY_SPACE) == KEY_DOWN)
+    // {
+    //     windowSetShouldClose(window, TRUE);
+    //     // vec3 tmp = {0.0f, 0.0f, 0.0f};
+    //     // glm_vec3_scale(camera->up, cameraSpeed, tmp);
+    //     // glm_vec3_add(camera->position, tmp, camera->position);
+    // }
     if (windowGetKey(window, KEY_W) == KEY_DOWN)
     {
         vec3 tmp = {0.0f, 0.0f, 0.0f};
@@ -225,6 +224,24 @@ Bool inputGetKeyPressedOnce(struct Window *window, enum InputKey key)
             return FALSE;
         }
         break;
+    case MOUSE_LEFT:
+        if (windowGetKey(window, key))
+        {
+            if (staticKeyState.mouseLeft)
+            {
+                return FALSE;
+            }
+            else
+            {
+                staticKeyState.mouseLeft = TRUE;
+                return TRUE;
+            }
+        }
+        else
+        {
+            staticKeyState.mouseLeft = FALSE;
+            return FALSE;
+        }
     default:
         return FALSE;
     }

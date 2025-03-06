@@ -1,5 +1,0 @@
-C:/code/engine/packages/freetype-2.13.3/build/CMakeFiles/freetype.dir
-C:/code/engine/packages/freetype-2.13.3/build/CMakeFiles/PACKAGE.dir
-C:/code/engine/packages/freetype-2.13.3/build/CMakeFiles/INSTALL.dir
-C:/code/engine/packages/freetype-2.13.3/build/CMakeFiles/ALL_BUILD.dir
-C:/code/engine/packages/freetype-2.13.3/build/CMakeFiles/ZERO_CHECK.dir

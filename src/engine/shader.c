@@ -48,16 +48,15 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
 
     i4 attributeCount;
     glGetProgramiv(dest->id, GL_ACTIVE_ATTRIBUTES, &attributeCount);
-    mDebug("Attribute count: %d\n", attributeCount);
+    mDebug("Active Attribute count: %d\n", attributeCount);
     dest->attributeCount = attributeCount;
 
     for(index_t i = 0; i < attributeCount; i++){
         char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
-        size written = 0;
+        size_t written = 0;
         GLint size = 0;
         GLenum type = 0;
         glGetActiveAttrib(dest->id, (GLuint)i, MAX_SHADER_VARIABLE_NAME_LENGTH, &written, &size, &type, name);
-        mDebug("Attribute %d: %s\n", i, name);
 
         dest->attributes[i].location = glGetAttribLocation(dest->id, name);
         dest->attributes[i].type = type;
@@ -70,16 +69,15 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     // oyuzden tum uniformlar gorunmuyor
     i4 uniformCount;
     glGetProgramiv(dest->id, GL_ACTIVE_UNIFORMS, &uniformCount);
-    mDebug("Uniform count: %d\n", uniformCount);
+    mDebug("Active Uniform count: %d\n", uniformCount);
     dest->uniformCount = uniformCount;
 
     for(index_t i = 0; i < uniformCount; i++){
         char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
-        size written = 0;
+        size_t written = 0;
         GLint size = 0;
         GLenum type = 0;
         glGetActiveUniform(dest->id, (GLuint)i, MAX_SHADER_VARIABLE_NAME_LENGTH, &written, &size, &type, name);
-        mDebug("Uniform %d: %s\n", i, name);
 
         strcpy(dest->uniforms[i].name, name);
         dest->uniforms[i].type = type;
@@ -124,7 +122,7 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
 
     if (!success)
     {
-        size infoLogSizeWithoutNull = 0;
+        size_t infoLogSizeWithoutNull = 0;
         glGetShaderInfoLog(shader, 0, &infoLogSizeWithoutNull, NULL);
         //TODO change this with custom string
         char *infoLog = malloc(infoLogSizeWithoutNull + 1);
