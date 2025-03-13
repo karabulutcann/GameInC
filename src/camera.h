@@ -29,6 +29,8 @@ struct CameraCreateOptions {
     float mouseSensitivity;
 };
 
+struct Camera* cameraGet();
+
 struct Result _cameraCreateDefault(struct Camera* dest);
 
 struct Result _cameraCreate(struct CameraCreateOptions options, struct Camera* dest);

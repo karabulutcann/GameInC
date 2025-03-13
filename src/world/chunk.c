@@ -1,5 +1,6 @@
 #include "chunk.h"
 #include "core/log.h"
+#include "engine/engine.h"
 #include "memory.h"
 
 #define FNL_IMPL
@@ -10,8 +11,17 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     memset(dest, 0, sizeof(struct Chunk));
     dest->position[0] = chunkPos[0];
     dest->position[1] = chunkPos[1];
+    // TODO turn this into stack array
     dest->blockTypeArr = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(u1));
-    dest->mesh = NULL;
+    struct Mesh *mesh;
+    for(index_t i = 0; i < TOTAL_LOAD_COUNT; i++){
+        mesh = dynamicArrayGet(engineGet()->cubeDefferedRenderer.geometryPass.meshes, i);
+        if(!mesh->isInUse){
+            dest->mesh = mesh;
+            mesh->isInUse = TRUE;
+            break;
+        }
+    }
 
     // Allocate memory for the chunk
     if (dest->blockTypeArr == NULL)
@@ -29,7 +39,6 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     // 4 den sonrası değişiklik yaratmıyo
     noise_state.octaves = 4;
     noise_state.gain = 0.4f;
-
 
     for (int x = 0; x < CHUNK_SIZE_X; x++)
     {
@@ -66,15 +75,6 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     }
 }
 
-// Do not call gl func in other threads than main
-void chunkInitVbo(struct Chunk *self)
-{
-    glGenBuffers(1, &self->vertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, self->vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, self->vertexCount * sizeof(float), self->mesh, GL_STATIC_DRAW);
-}
-
-
 void chunkDestroy(struct Chunk *chunk)
 {
     if (chunk->blockTypeArr != NULL)
@@ -82,11 +82,7 @@ void chunkDestroy(struct Chunk *chunk)
         free(chunk->blockTypeArr);
         chunk->blockTypeArr = NULL;
     }
-    if (chunk->mesh != NULL)
-    {
-        free(chunk->mesh);
-        chunk->mesh = NULL;
-    }
+    chunk->mesh->isInUse = FALSE;
 }
 
 #include <rapidhash.h>
@@ -101,8 +97,6 @@ struct ChunkTableMeta
     u4 length;
     u4 count;
 };
-
-typedef struct Chunk *ChunkTable;
 
 ChunkTable chunkTableCreate(u4 length)
 {
@@ -125,27 +119,28 @@ struct Result chunkTableInsert(ChunkTable table, i4 position[2], struct Chunk ch
     struct ChunkTableMeta *meta = chunkTableGetMeta(table);
     if (meta->count == meta->length)
     {
-       return mErr("Hash table is full!");
+        return mErr("Hash table is full!");
     }
     u4 key = hashPosition(position) % meta->length;
     struct Chunk c = {0};
     c = table[(key) % meta->length];
     index_t i = 0;
-    while (c.blockTypeArr != NULL && i < meta->length)
-    {
-        i++;
-        c = table[(key + i) % meta->length];
-    }
-    if (c.blockTypeArr == NULL)
-    {
-        table[(key + i) % meta->length] = chunk;
-        meta->count++;
-    }
-    else
-    {
-        mInfo("Cant insert chunk at position %d %d\n", position[0], position[1]);
-    }
-    return ok();
+        while (c.blockTypeArr != NULL && i < meta->length)
+        {
+            i++;
+            c = table[(key + i) % meta->length];
+        }
+        if (c.blockTypeArr == NULL)
+        {
+            table[(key + i) % meta->length] = chunk;
+            meta->count++;
+        }
+        else
+        {
+            mInfo("Cant insert chunk at position %d %d\n", position[0], position[1]);
+        }
+        return ok();
+   
 }
 
 void chunkTableRemove(ChunkTable table, i4 position[2])

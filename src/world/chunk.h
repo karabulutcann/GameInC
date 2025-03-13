@@ -1,6 +1,7 @@
 #pragma once
 #include "core/core.h"
 #include "core/result.h"
+#include "engine/mesh.h"
 #include <cglm/cglm.h>
 
 struct Chunk{
@@ -8,16 +9,10 @@ struct Chunk{
     Bool isVboCreated;
     Bool isLoading;
     u1* blockTypeArr;
-    float* mesh;
-    u4 vertexBufferObject;
-    count_t vertexCount;
+    struct Mesh* mesh;
 };
 
-void chunkGenerateMesh(struct Chunk *self);
-
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest);
-
-void chunkInitVbo(struct Chunk *self);
 
 void chunkDestroy(struct Chunk* chunk);
 

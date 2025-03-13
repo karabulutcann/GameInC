@@ -3,6 +3,12 @@
 #include "world/world.h"
 #include <math.h>
 
+static struct Camera* staticCamera;
+
+struct Camera* cameraGet(){
+    return staticCamera;
+}
+
 struct Result _cameraCreate(struct CameraCreateOptions options, struct Camera* dest){
     if (!dest) return mErr("Destination cant be null");
 
@@ -13,6 +19,8 @@ struct Result _cameraCreate(struct CameraCreateOptions options, struct Camera* d
     dest->pitch = options.pitch;
     dest->movementSpeed = options.movementSpeed;
     dest->mouseSensitivity = options.mouseSensitivity;
+
+    staticCamera = dest;
 
     return ok();
 }

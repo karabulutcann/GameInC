@@ -1,10 +1,9 @@
 #pragma once
 #include "core/core.h"
-#include "chunk.h"
+#include "world/chunk.h"
 #include "FastNoiseLight/FastNoiseLite.h"
 
 // 10 dan fazla iken zorlaniyo
-#define WORLD_SIZE_X 60
 
 enum BlockType
 {
@@ -30,8 +29,6 @@ enum Face
     TOP
 };
 
-
-
 struct World
 {
     ChunkTable chunkTable;
@@ -43,7 +40,9 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2]);
 
 void worldUnloadChunk(struct World *self, i4 chunkPos[2]);
 
-void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2]);
+Bool staticWorldLoadChunk(i4 chunkPos[2]);
+
+// void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2]);
 
 count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh);
 

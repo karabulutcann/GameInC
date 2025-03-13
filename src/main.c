@@ -1,5 +1,3 @@
-// thread windows headerlerini includeladiginden opengl we glfw den once importla obur turlu macrolar cakisiyor
-// #include "core/thread.h"
 #include "core/core.h"
 #include "engine/window.h"
 #include "core/log.h"
@@ -7,34 +5,19 @@
 #include "engine/shader.h"
 #include "camera.h"
 #include "world/world.h"
+#include "world/chunk_generator.h"
 #include "engine/engine.h"
+#include "core/worker/job.h"
+#include "core/worker/worker.h"
+#include "core/worker/boss.h"
 #include "input.h"
 #include <math.h>
 #include <cglm/cglm.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_IMPLEMENTATION
-#define NK_GLFW_GL4_IMPLEMENTATION
-#define NK_KEYSTATE_BASED_INPUT
-#include <nuklear/nuklear.h>
-#include <nuklear/nuklear_glfw_gl4.h>
-
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
-
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
-
-#define INCLUDE_OVERVIEW
-#include <nuklear/overview.c>
 
 volatile struct Camera camera;
 
@@ -44,245 +27,54 @@ float lastFrame = 0.0f;
 vec3 lightPos = {0.f, 50.0f, 0.0f};
 
 #define cubeSize 0.4f
-
-volatile Bool threadShouldClose = FALSE;
-
 #define LOAD_RADIUS 5
-
-void getPlayerChunkCoords(struct Camera *camera, i4 chunkCoords[2])
-{
-    chunkCoords[0] = (int)(camera->position[0] / (cubeSize * CHUNK_SIZE_X));
-    chunkCoords[1] = (int)(camera->position[2] / (cubeSize * CHUNK_SIZE_Z));
-}
-
-void loadChunksAroundPlayer(struct World *world, struct Camera *camera)
-{
-    i4 playerChunk[2];
-    getPlayerChunkCoords(camera, playerChunk);
-
-    // Define the loading radius (for example, a 3x3 grid of chunks)
-    int loadRadius = LOAD_RADIUS;
-
-    // TODO tüm chunkları tek tek gezme farklı bir yöntem bul
-    for (int x = (-LOAD_RADIUS / 2); x <= (LOAD_RADIUS / 2); x++)
-    {
-        for (int z = (-LOAD_RADIUS / 2); z <= (LOAD_RADIUS / 2); z++)
-        {
-            i4 chunkCoords[2] = {playerChunk[0] + x, playerChunk[1] + z};
-
-            // Check if the chunk is already loaded
-            struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkCoords);
-            if (chunk == NULL)
-            {
-                // Load the chunk
-                worldLoadChunk(world, chunkCoords);
-                worldGenerateChunkMesh(world, chunkCoords);
-            }
-        }
-    }
-
-    // for (int x = (-LOAD_RADIUS / 2); x <= (LOAD_RADIUS / 2); x++)
-    // {
-    //     for (int z = (-LOAD_RADIUS / 2); z <= (LOAD_RADIUS / 2); z++)
-    //     {
-    //         i4 chunkCoords[2] = {playerChunk[0] + x, playerChunk[1] + z};
-
-    //         // Check if the chunk is already loaded
-    //         struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkCoords);
-    //         if (chunk == NULL)
-    //         {
-    //             // Load the chunk
-    //             // worldLoadChunk(world, chunkCoords);
-    //             worldGenerateChunkMesh(world, chunkCoords);
-    //         }
-    //     }
-    // }
-}
-
-void unloadChunks(struct World *world, struct Camera *camera)
-{
-    i4 playerChunk[2];
-    getPlayerChunkCoords(camera, playerChunk);
-
-    // Define the unloading radius (you may want to keep a few extra chunks loaded)
-    int unloadRadius = LOAD_RADIUS;
-
-    // Loop through all chunks and unload those outside the radius
-    for (index_t i = 0; i < WORLD_SIZE_X * WORLD_SIZE_X; i++)
-    {
-        // TODO bunu worldUnloadChunk ta zaten yapıyosun bunu iptal et
-        struct Chunk chunk = world->chunkTable[i];
-        if (chunk.blockTypeArr != NULL && abs(chunk.position[0] - playerChunk[0]) > unloadRadius || abs(chunk.position[1] - playerChunk[1]) > unloadRadius)
-        {
-            worldUnloadChunk(world, chunk.position);
-        }
-    }
-}
-
-// mThreadCreateFunc(threadFunction, threadData, {
-//     struct Mutex *mutex = threadData->mutex;
-//     struct World *world = (struct World *)mutex->sharedState;
-
-//     while (!threadShouldClose)
-//     {
-//         loadChunksAroundPlayer(world, &camera);
-//         unloadChunks(world, &camera);
-//     }
-
-//     return 0;
-// })
 
 int main()
 {
+    struct Boss boss = {0};
+    bossCreate(&boss);
+    bossHireWorker(&boss);
+    // bossHireWorker(&boss);
 
-    // struct ThreadManager threadManager = {0};
-    // threadManagerCreate(&threadManager);
-
+    // TODO stack overflow oluyo arraylar cok buyuk tum buyuk arraylari heapden olustur
     struct Engine engine = {0};
     engineCreate(&engine);
-
-    int width = 0, height = 0;
-    struct nk_context *ctx;
-    struct nk_colorf bg;
-    struct nk_image img;
-
-#ifdef INCLUDE_CONFIGURATOR
-    static struct nk_color color_table[NK_COLOR_COUNT];
-    memcpy(color_table, nk_default_color_style, sizeof(color_table));
-#endif
-
-    ctx = nk_glfw3_init(engine.window.windowHandle, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-    {
-        struct nk_font_atlas *atlas;
-        nk_glfw3_font_stash_begin(&atlas);
-        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/DroidSans.ttf", 14, 0);
-        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/Roboto-Regular.ttf", 16, 0);
-        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/kenvector_future_thin.ttf", 13, 0);
-        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/ProggyClean.ttf", 16, 0);
-        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/ProggyTiny.ttf", 10, 0);
-        struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/Cousine-Regular.ttf", 13, 0);
-        nk_glfw3_font_stash_end();
-        nk_style_load_all_cursors(ctx, atlas->cursors);
-        nk_style_set_font(ctx, &font->handle);
-    }
-
-    /* Create bindless texture.
-     * The index returned is not the opengl resource id.
-     * IF you need the GL resource id use: nk_glfw3_get_tex_ogl_id() */
-
-    bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
-
-    struct Shader chunkShader = {0};
-    struct Shader lightingShader = {0};
-
-    shaderCreate("shaders/g_buffer_vertex.glsl", "shaders/g_buffer_fragment.glsl", NULL, &chunkShader);
-    shaderCreateTexture(&chunkShader, "assets/textures/texture_atlas.png", "textureAtlas");
-    shaderCreate("shaders/deffered_vertex.glsl", "shaders/deffered_fragment.glsl", NULL, &lightingShader);
-
-    unsigned int gBuffer;
-    glGenFramebuffers(1, &gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-    unsigned int gPosition, gNormal, gAlbedoSpec;
-    // position color buffer
-    glGenTextures(1, &gPosition);
-    glBindTexture(GL_TEXTURE_2D, gPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, engine.window.width, engine.window.height, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-    // normal color buffer
-    glGenTextures(1, &gNormal);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, engine.window.width, engine.window.height, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-    // color + specular color buffer
-    glGenTextures(1, &gAlbedoSpec);
-    glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, engine.window.width, engine.window.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
-    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-    unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-    glDrawBuffers(3, attachments);
-    // create and attach depth buffer (renderbuffer)
-    unsigned int rboDepth;
-    glGenRenderbuffers(1, &rboDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, engine.window.width, engine.window.height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-    // finally check if framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        mError("Framebuffer is not complete!\n");
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     struct World world = {0};
     worldCreate(&world);
 
+    struct ChunkGenerator chunkGenerator = {0};
+    chunkGeneratorCreate(&chunkGenerator);
+
     struct Chunk chunk = {0};
     chunkCreate((i4[2]){0, 0}, &chunk);
     chunkTableInsert(world.chunkTable, (i4[2]){0, 0}, chunk);
-    worldGenerateChunkMesh(&world, (i4[2]){0, 0});
+    chunkGeneratorGenerateMesh(&chunkGenerator, &world, (i4[2]){0, 0});
 
-    // // struct Mutex worldMutex = {0};
-    // // InitializeCriticalSection(&worldMutex.critSection);
-    // // worldMutex.sharedState = &world;
+    // for (index_t x = -LOAD_DISTANCE; x < LOAD_DISTANCE * 2 + 1; x++)
+    // {
+    //     for (index_t z = -LOAD_DISTANCE; z < LOAD_DISTANCE * 2 + 1; z++)
+    //     {
+    //         bossAssignJob(&boss, (struct Job){.func = staticWorldLoadChunk, .data = (void *)(i4[2]){x, z}, .type = LOAD_CHUNK});
+    //     }
+    // }
 
-    // // threadManagerSpawnThread(&threadManager, &worldMutex, threadFunction);
+    // for (index_t x = -LOAD_DISTANCE; x < LOAD_DISTANCE * 2 + 1; x++)
+    // {
+    //     for (index_t z = -LOAD_DISTANCE; z < LOAD_DISTANCE * 2 + 1; z++)
+    //     {
+    //         bossAssignJob(&boss, (struct Job){.func = NULL, .data = (void *)(i4[2]){0, 0}, .type = GENERATE_MESH});
+    //     }
+    // }
 
     CACHE_RESULT(mCameraCreate(&camera));
 
     mDebug("World loaded\n");
 
-    float quadVertices[] = {
-        // positions        // texture Coords
-        -1.0f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        -1.0f,
-        -1.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        0.0f,
-        1.0f,
-        0.0f,
-    };
-
-    u4 quadVAO;
-    u4 quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-    glBindVertexArray(0);
-
-    shaderUse(&lightingShader);
-    shaderSetInt(&lightingShader, "gPosition", 0);
-    shaderSetInt(&lightingShader, "gNormal", 1);
-    shaderSetInt(&lightingShader, "gAlbedoSpec", 2);
-
     while (!windowShouldClose(&engine.window))
     {
-
         struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
-        RaycastHit hit = RaycastBlock((vec3){camera.position[0] - 0.2f,camera.position[1] + 0.4f,camera.position[2]}, camera.front, chunk);
+        RaycastHit hit = RaycastBlock((vec3){camera.position[0] - 0.2f, camera.position[1] + 0.4f, camera.position[2]}, camera.front, chunk);
 
         if (inputGetKeyPressedOnce(&engine.window, MOUSE_LEFT) && engine.window.isMouseLocked)
         {
@@ -290,184 +82,38 @@ int main()
             {
                 mDebug("hit to %d\n", hit.index);
                 chunk->blockTypeArr[hit.index] = 0;
-                worldGenerateChunkMesh(&world, (i4[2]){0, 0});
-                glNamedBufferData(chunk->vertexBufferObject, chunk->vertexCount * sizeof(float), chunk->mesh, GL_STATIC_DRAW);
+                bossAssignJob(&boss,(struct Job){
+                    .data= (i4[2]){0, 0},
+                    .type= GENERATE_MESH
+                });
+                // worldGenerateChunkMesh(&world, (i4[2]){0, 0});
             }
         }
 
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
         glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 300.0f, projection);
-
+ 
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         CACHE_RESULT(cameraLookAt(camera, view));
 
-        engineUpdate(&engine, projection, view);
         inputProcess(&engine.window, engine.deltaTime, &camera);
+        engineUpdate(&engine, projection, view);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        shaderPrepareForDraw(&chunkShader);
-
-        shaderSetMat4(&chunkShader, "projection", projection);
-        shaderSetMat4(&chunkShader, "view", view);
-
-        mat4 model = GLM_MAT4_IDENTITY_INIT;
-        shaderSetMat4(&chunkShader, "model", model);
-
-        i4 playerChunk[2];
-        getPlayerChunkCoords(&camera, playerChunk);
-
-        for (i4 x = (i4)(-LOAD_RADIUS / 2); x <= (i4)(LOAD_RADIUS / 2); x++)
+        if (hit.hit)
         {
-            for (i4 z = (i4)(-LOAD_RADIUS / 2); z <= (i4)(LOAD_RADIUS / 2); z++)
-            {
-                struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){playerChunk[0] + x, playerChunk[1] + z});
-                if (chunk == NULL || chunk->isLoading == TRUE || chunk->mesh == NULL)
-                {
-                    continue;
-                }
-
-                if (chunk->isVboCreated == FALSE)
-                {
-                    chunkInitVbo(chunk);
-                    chunk->isVboCreated = TRUE;
-                }
-                mat4 model = GLM_MAT4_IDENTITY_INIT;
-                glm_translate(model, (vec3){chunk->position[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunk->position[1] * cubeSize * CHUNK_SIZE_Z});
-                shaderSetMat4(&chunkShader, "model", model);
-                // TODO bunu burda yapma vertex buffer object baglanmadan calismiyor
-                // glNamedBuffer foksiyonlarini kullan
-                glBindVertexArray(chunkShader.vertexArrayObject);
-                glBindBuffer(GL_ARRAY_BUFFER, chunk->vertexBufferObject);
-
-                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-
-                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-
-                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-
-                glEnableVertexAttribArray(0);
-                glEnableVertexAttribArray(1);
-                glEnableVertexAttribArray(2);
-
-                glDrawArrays(GL_TRIANGLES, 0, chunk->vertexCount);
-            }
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        shaderUse(&lightingShader);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, gPosition);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, gNormal);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-
-        shaderSetVec3(&lightingShader, "viewPos", camera.position);
-        shaderSetVec3(&lightingShader, "lights[0].Position", (vec3){-0.2f, -1.0f, -0.3f});
-        shaderSetVec3(&lightingShader, "lights[0].Color", (vec3){1.0f, 1.0f, 1.0f});
-        shaderSetFloat(&lightingShader, "lights[0].Linear", 0.7f);
-        shaderSetFloat(&lightingShader, "lights[0].Quadratic", 1.8f);
-        shaderSetInt(&lightingShader, "lights[0].type", 1);
-
-        // finally render quad
-        glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindVertexArray(0);
-
-
-        
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-        // // blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-        // // the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the
-        // // depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-
-        // this is used for copying the depth buffer to the default framebuffer for rendering with forward rendering but it doesn't work fix it
-        //  glBlitFramebuffer(0, 0, engine.window.width, engine.window.height, 0, 0, engine.window.width, engine.window.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        if(hit.hit){
             glDisable(GL_DEPTH_TEST);
             cubeHighlightRendererUpdate(&engine.cubeHighlightRenderer, projection, view, (i4[2]){0, 0}, (i4[3]){hit.blockPos.x, hit.blockPos.y, hit.blockPos.z});
         }
 
-        nk_glfw3_new_frame();
-
-        /* GUI */
-        if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
-                     NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
-                         NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-        {
-            enum
-            {
-                EASY,
-                HARD
-            };
-            static int op = EASY;
-            static int property = 20;
-            nk_layout_row_static(ctx, 30, 80, 1);
-            if (nk_button_label(ctx, "button"))
-                fprintf(stdout, "button pressed\n");
-
-            nk_layout_row_dynamic(ctx, 30, 2);
-            if (nk_option_label(ctx, "easy", op == EASY))
-                op = EASY;
-            if (nk_option_label(ctx, "hard", op == HARD))
-                op = HARD;
-
-            nk_layout_row_dynamic(ctx, 25, 1);
-            nk_property_int(ctx, "Compression:", 0, &property, 100, 10, 1);
-
-            nk_layout_row_dynamic(ctx, 20, 1);
-            nk_label(ctx, "background:", NK_TEXT_LEFT);
-            nk_layout_row_dynamic(ctx, 25, 1);
-            if (nk_combo_begin_color(ctx, nk_rgb_cf(bg), nk_vec2(nk_widget_width(ctx), 400)))
-            {
-                nk_layout_row_dynamic(ctx, 120, 1);
-                bg = nk_color_picker(ctx, bg, NK_RGBA);
-                nk_layout_row_dynamic(ctx, 25, 1);
-                bg.r = nk_propertyf(ctx, "#R:", 0, bg.r, 1.0f, 0.01f, 0.005f);
-                bg.g = nk_propertyf(ctx, "#G:", 0, bg.g, 1.0f, 0.01f, 0.005f);
-                bg.b = nk_propertyf(ctx, "#B:", 0, bg.b, 1.0f, 0.01f, 0.005f);
-                bg.a = nk_propertyf(ctx, "#A:", 0, bg.a, 1.0f, 0.01f, 0.005f);
-                nk_combo_end(ctx);
-            }
-        }
-        nk_end(ctx);
-
-#ifdef INCLUDE_OVERVIEW
-        overview(ctx);
-#endif
-        /* ----------------------------------------- */
-
-        nk_glfw3_render(NK_ANTI_ALIASING_ON);
-
         windowSwapBuffers(&engine.window);
     }
 
-    // threadShouldClose = TRUE;
+    // mDebug("World destroy");
+    // worldDestroy(&world);
 
-    // threadManagerWaitForAll(&threadManager, INFINITE);
+    // mDebug("Engine destroy");
+    // engineDestroy(&engine);
 
-    // threadManagerDestroy(&threadManager);
-
-    mDebug("World destroy");
-    worldDestroy(&world);
-
-    mDebug("Shader destroy");
-    shaderDestroy(&chunkShader);
-
-    mDebug("Shader destroy");
-    shaderDestroy(&lightingShader);
-
-    mDebug("Engine destroy");
-    engineDestroy(&engine);
-
-    nk_glfw3_shutdown();
     return 0;
 }
 

@@ -1,11 +1,8 @@
 #pragma once
 #include "core/core.h"
-#include "mesh.h"
-#include "texture.h"
-
-#define MAX_UNIFORM_COUNT 16
-#define MAX_ATTRIBUTE_COUNT 16
-#define MAX_SHADER_VARIABLE_NAME_LENGTH 256
+#include "engine/mesh.h"
+#include "engine/texture.h"
+#include "core/dynamic_array.h"
 
 struct ShaderAttribute{
     index_t location;
@@ -15,12 +12,7 @@ struct ShaderAttribute{
     size_t offset;
 };
 
-struct ShaderUniform{
-    // TODO change this with custom string
-    char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
-    GLenum type;
-    size_t size;
-};
+
 
 struct Shader{
     u4 id;
@@ -30,7 +22,7 @@ struct Shader{
     count_t attributeCount;
 
     //TODO turn this into dynamic array
-    struct ShaderUniform uniforms[MAX_UNIFORM_COUNT];
+    struct Uniform uniforms[MAX_UNIFORM_COUNT];
     count_t uniformCount;
 
     struct Texture textures[16];
@@ -41,7 +33,7 @@ struct Shader{
     const char* fragmentPath;
     GlVertexArray vertexArrayObject;
 
-    //TODO change with dynamic array
+    //TODO change with dynamic array 
     struct Mesh* meshes;
     count_t meshCount;
 };
@@ -54,6 +46,8 @@ void shaderBindBuffers(struct Shader *self,count_t bindingCount,struct ShaderBuf
 
 // samplerName cannot be "texture" because it is a reserved word
 void shaderCreateTexture(struct Shader *self, const char *imagePath, const char *samplerName);
+
+void shaderBindUniforms(struct Shader* self,count_t uniformCount, struct Uniform* uniforms);
 
 void shaderUse(struct Shader* self);
 

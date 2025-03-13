@@ -1,7 +1,7 @@
 #pragma once
 #include "core/result.h"
-#include "window.h"
-#include "shader.h"
+#include "engine/window.h"
+#include "engine/shader.h"
 
 struct CubeDefferedRenderer {
     struct Shader geometryPass;
@@ -29,6 +29,7 @@ struct Engine{
     f4 deltaTime;
     f4 lastFrame;
 };
+struct Engine *engineGet();
 
 struct Result engineCreate(struct Engine * dest);
 

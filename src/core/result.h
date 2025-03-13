@@ -52,4 +52,5 @@ struct Result ok();
 
 // Macro dispatcher to choose the correct version
 
+//TODO CACHE degil CATCH olucak
 #define CACHE_RESULT(...) GET_MACRO2(__VA_ARGS__, _CACHE_RESULT_W_OPTIONS, _CACHE_RESULT_DEFAULT)(__VA_ARGS__)

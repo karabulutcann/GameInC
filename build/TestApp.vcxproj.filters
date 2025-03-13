@@ -7,13 +7,19 @@
     <ClCompile Include="C:\code\engine\src\core\core.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\data_types.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\dynamic_array.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\code\engine\src\core\file.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\code\engine\src\core\job.c">
+    <ClCompile Include="C:\code\engine\src\core\log.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\code\engine\src\core\log.c">
+    <ClCompile Include="C:\code\engine\src\core\queue.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\code\engine\src\core\result.c">
@@ -28,7 +34,19 @@
     <ClCompile Include="C:\code\engine\src\core\safe_strings.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\code\engine\src\core\thread.c">
+    <ClCompile Include="C:\code\engine\src\core\worker\boss.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\worker\job.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\worker\mutex.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\worker\thread.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\code\engine\src\core\worker\worker.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\code\engine\src\engine\engine.c">

@@ -6,6 +6,8 @@
 
 #define sizeVertex 0.2f
 
+const static struct World* staticWorld;
+
 const float cubeVertices[] = {
     // Back face
     -sizeVertex, -sizeVertex, -sizeVertex, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom left
@@ -56,11 +58,18 @@ const float cubeVertices[] = {
     -sizeVertex, sizeVertex, sizeVertex, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 };
 
-
+struct World *worldGet(){
+    if(staticWorld == NULL){
+        mError("World not initialized");
+        exit(1);
+    }
+    return staticWorld;
+}
 
 void worldCreate(struct World *dest)
 {
-    dest->chunkTable = chunkTableCreate(WORLD_SIZE_X * WORLD_SIZE_X);
+    staticWorld = dest;
+    dest->chunkTable = chunkTableCreate(WORLD_SIZE_X * WORLD_SIZE_X); 
 }
 
 void worldLoadChunk(struct World *self, i4 chunkPos[2])
@@ -72,6 +81,19 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2])
     {
         chunkDestroy(&chunk);
         CACHE_RESULT(r)
+    }
+}
+
+Bool staticWorldLoadChunk(i4 chunkPos[2])
+{
+    struct Chunk chunk = {0};
+    chunkCreate(chunkPos, &chunk);
+    struct Result r = chunkTableInsert(staticWorld->chunkTable, chunkPos, chunk);
+    if (!r.success)
+    {
+        chunkDestroy(&chunk);
+        CACHE_RESULT(r);
+        return TRUE;
     }
 }
 
@@ -276,43 +298,6 @@ count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
         glm_vec2_add(mesh + i * CUBE_VERTEX_SIZE + 6, uvCoords, mesh + i * CUBE_VERTEX_SIZE + 6);
     }
     return CUBE_VERTEX_SIZE * 6;
-}
-
-void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2])
-{
-    struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
-    if (chunk == NULL)
-    {
-        return;
-    }
-    chunk->isLoading = TRUE;
-    count_t totalWritten = 0;
-    // TODO max mesh size da memory allocateliyosun meshi oluşturduktan sonra yeniden boyutlandır
-    chunk->mesh = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(float) * CUBE_VERTEX_SIZE * 36);
-    if (chunk->mesh == NULL)
-    {
-        mError("Failed to allocate memory for chunk mesh!\n");
-        exit(1);
-    }
-    for (int i = 0; i < CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y; i++)
-    {
-        if (chunk->blockTypeArr[i] != AIR)
-        {
-            u4 coords[3] = {i % CHUNK_SIZE_X, i / CHUNK_SIZE_X / CHUNK_SIZE_Z, i / CHUNK_SIZE_X % CHUNK_SIZE_Z};
-            vec3 position = {(coords[0]) * cubeSize, (coords[1]) * cubeSize, (coords[2]) * cubeSize};
-            char neighborTypes[6] = {0};
-            worldGetBlockNeighbors(self, i, *chunk, chunkPos, coords, neighborTypes);
-            for (int j = 0; j < 6; j++)
-            {
-                if (neighborTypes[j] == AIR)
-                {
-                    totalWritten += blockGenerateMesh(j, chunk->blockTypeArr[i], position, chunk->mesh + totalWritten);
-                }
-            }
-        }
-    }
-    chunk->vertexCount = totalWritten;
-    chunk->isLoading = FALSE;
 }
 
 void worldDestroy(struct World *self)

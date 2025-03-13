@@ -68,6 +68,12 @@ typedef u8 count_t;
 
 typedef u8 index_t;
 
+#ifndef size_t
+typedef u8 size_t;
+#endif
+
+typedef u8 id_t;
+
 typedef u4 GlFrameBuffer;
 
 typedef u4 GlTexture;
@@ -77,3 +83,17 @@ typedef u4 GlRenderBuffer;
 typedef u4 GlVertexBuffer;
 
 typedef u4 GlVertexArray;
+
+#define MAX_UNIFORM_COUNT 16
+#define MAX_ATTRIBUTE_COUNT 6
+#define MAX_SHADER_VARIABLE_NAME_LENGTH 64
+
+
+#define WORLD_SIZE_X 60
+
+#define LOAD_DISTANCE 5
+
+#define TOTAL_LOAD_COUNT (LOAD_DISTANCE * 2 + 1) * (LOAD_DISTANCE * 2 + 1)
+
+#define MAX_MESH_COUNT TOTAL_LOAD_COUNT
+

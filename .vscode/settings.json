@@ -48,7 +48,19 @@
         "xiosbase": "c",
         "glu.h": "c",
         "nuklear_glfw_gl4.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "job.h": "c",
+        "unity.h": "c",
+        "mesh.h": "c",
+        "texture.h": "c",
+        "boss.h": "c",
+        "worker.h": "c",
+        "chunk_generator.h": "c",
+        "windows.h": "c",
+        "memory.h": "c",
+        "new": "c",
+        "cstdlib": "c",
+        "xlocinfo": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

@@ -1,21 +1,12 @@
-#include "core/core.h"
-#include "world/chunk.h"
-#include "world/world.h"
-
-
-#define TEMP_MESH_SIZE (CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(f4) * CUBE_VERTEX_SIZE * 36)
-
-struct TempMesh{
-    Bool isFree;
-    f4 mesh[TEMP_MESH_SIZE];
-};
-
-struct ChunkGenerator{
-    struct TempMesh tempMeshArr[3];
-};
+#include "world/chunk_generator.h"
+#include "core/dynamic_array.h"
 
 void chunkGeneratorCreate(struct ChunkGenerator *dest){
-    
+    for(int i = 0; i < TEMP_MESH_COUNT; i++){
+        dest->tempMeshArr[i].isFree = TRUE;
+        dest->tempMeshArr[i].totalWritten = 0;
+        dest->tempMeshArr[i].mesh = dynamicArrayCreate(DATA_TYPE_F4, TEMP_MESH_SIZE, sizeof(f4));
+    }
 }
 
 struct TempMesh* chunkGeneratorGetTempMesh(struct ChunkGenerator *self){
@@ -24,18 +15,15 @@ struct TempMesh* chunkGeneratorGetTempMesh(struct ChunkGenerator *self){
         if (self->tempMeshArr[i].isFree)
         {
             self->tempMeshArr[i].isFree = FALSE;
-            for(int j = 0; j < TEMP_MESH_SIZE; j++)
-            {
-                self->tempMeshArr[i].mesh[j] = 0.0f;
-            }
-            return &self->tempMeshArr[i];
+            self->tempMeshArr[i].totalWritten = 0;
+            return (self->tempMeshArr + i);
             break;
         }
     }
     return NULL;
 }
 
-void chunkGeneratorGenerateMesh(struct ChunkGenerator *self,struct World* world, i4 chunkPos[2]){
+struct Result chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct World* world, i4 chunkPos[2]){
 
     struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkPos);
     if (chunk == NULL)
@@ -50,6 +38,7 @@ void chunkGeneratorGenerateMesh(struct ChunkGenerator *self,struct World* world,
         return;
     }
 
+    chunk->mesh->isLoading = TRUE;
     chunk->isLoading = TRUE;
     count_t totalWritten = 0;
 
@@ -70,7 +59,13 @@ void chunkGeneratorGenerateMesh(struct ChunkGenerator *self,struct World* world,
             }
         }
     }
-    chunk->vertexCount = totalWritten;
+    mat4 model = GLM_MAT4_IDENTITY_INIT;
+    glm_translate(model, (vec3){chunkPos[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunkPos[1] * cubeSize * CHUNK_SIZE_Z});
+
+    meshSetUniform(chunk->mesh, "model", sizeof(mat4), model);
+
+    chunk->mesh->vertexCount = totalWritten;
+    chunk->mesh->tempMesh = tempMesh;
     chunk->isLoading = FALSE;
 }
 
