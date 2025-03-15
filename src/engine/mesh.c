@@ -2,6 +2,7 @@
 #include <string.h>
 #include <memory.h>
 
+//use gl function only call from main thread
 void meshCreate(count_t uniformCount, struct Uniform *meshUniforms, count_t bindingCount, struct ShaderBufferBinding *bindings, struct Mesh *dest)
 {
     *dest = (struct Mesh){0};

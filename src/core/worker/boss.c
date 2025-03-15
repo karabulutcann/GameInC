@@ -2,7 +2,8 @@
 #include "core/worker/boss.h"
 
 
-static struct ThreadManager* staticThreadManager = NULL;
+static struct ThreadManager* staticThreadManager;
+
 
 void bossCreate(struct Boss *dest)
 {
@@ -11,6 +12,7 @@ void bossCreate(struct Boss *dest)
 
     if (staticThreadManager == NULL)
     {
+        staticThreadManager = malloc(sizeof(struct ThreadManager));
         threadManagerCreate(staticThreadManager);
     }
 }

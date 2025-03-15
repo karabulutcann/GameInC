@@ -74,7 +74,7 @@ int main()
     while (!windowShouldClose(&engine.window))
     {
         struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
-        RaycastHit hit = RaycastBlock((vec3){camera.position[0] - 0.2f, camera.position[1] + 0.4f, camera.position[2]}, camera.front, chunk);
+        RaycastHit hit = RaycastBlock((vec3){camera.position[0] + 0.00f, camera.position[1] + 0.4f, camera.position[2]}, camera.front, chunk);
 
         if (inputGetKeyPressedOnce(&engine.window, MOUSE_LEFT) && engine.window.isMouseLocked)
         {
@@ -82,28 +82,32 @@ int main()
             {
                 mDebug("hit to %d\n", hit.index);
                 chunk->blockTypeArr[hit.index] = 0;
-                bossAssignJob(&boss,(struct Job){
-                    .data= (i4[2]){0, 0},
-                    .type= GENERATE_MESH
-                });
+                bossAssignJob(&boss, (struct Job){
+                                         .data = (i4[2]){0, 0},
+                                         .type = GENERATE_MESH});
                 // worldGenerateChunkMesh(&world, (i4[2]){0, 0});
             }
         }
 
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
         glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 300.0f, projection);
- 
+
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         CACHE_RESULT(cameraLookAt(camera, view));
 
         inputProcess(&engine.window, engine.deltaTime, &camera);
         engineUpdate(&engine, projection, view);
 
+        glDisable(GL_DEPTH_TEST);
+
         if (hit.hit)
         {
-            glDisable(GL_DEPTH_TEST);
             cubeHighlightRendererUpdate(&engine.cubeHighlightRenderer, projection, view, (i4[2]){0, 0}, (i4[3]){hit.blockPos.x, hit.blockPos.y, hit.blockPos.z});
         }
+
+        shaderUse(&engine.crosshair);
+        glBindVertexArray(engine.crosshair.vertexArrayObject);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         windowSwapBuffers(&engine.window);
     }

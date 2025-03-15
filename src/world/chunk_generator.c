@@ -39,6 +39,7 @@ struct Result chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct Wor
     }
 
     chunk->mesh->isLoading = TRUE;
+    chunk->mesh->isGenerating = TRUE;
     chunk->isLoading = TRUE;
     count_t totalWritten = 0;
 
@@ -67,6 +68,7 @@ struct Result chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct Wor
     chunk->mesh->vertexCount = totalWritten;
     chunk->mesh->tempMesh = tempMesh;
     chunk->isLoading = FALSE;
+    chunk->mesh->isGenerating = FALSE;
 }
 
 void chunkGeneratorDestroy(struct ChunkGenerator *self){    

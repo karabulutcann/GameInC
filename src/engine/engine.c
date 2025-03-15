@@ -71,6 +71,17 @@ GLuint cubeHighlightIndices[] = {
     2, 6,
     3, 7};
 
+#define crosshairSize 0.02f
+
+GLfloat crosshairVertices[] = {
+    -crosshairSize, -crosshairSize, 0.0f, // bottom left
+    crosshairSize, -crosshairSize, 0.0f,  // bottom right
+    crosshairSize, crosshairSize, 0.0f,   // top right
+    crosshairSize, crosshairSize, 0.0f,   // top right
+    -crosshairSize, crosshairSize, 0.0f,  // top left
+    -crosshairSize, -crosshairSize, 0.0f, // bottom left
+};
+
 static struct Engine *staticEngine;
 
 struct Engine *engineGet()
@@ -94,11 +105,8 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
     for (index_t i = 0; i < MAX_MESH_COUNT; i++)
     {
         meshCreate(dest->geometryPass.uniformCount,
-            dest->geometryPass.uniforms,
-            3, (struct ShaderBufferBinding[]){
-            {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0},
-             {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = sizeof(float) * 3},
-             {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = sizeof(float) * 6}}, dynamicArrayGet(dest->geometryPass.meshes, i));
+                   dest->geometryPass.uniforms,
+                   3, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0}, {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = sizeof(float) * 3}, {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = sizeof(float) * 6}}, dynamicArrayGet(dest->geometryPass.meshes, i));
     }
 
     glCreateFramebuffers(1, &dest->fbo);
@@ -149,9 +157,7 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
     glCreateBuffers(1, &dest->quadVBO);
     glNamedBufferData(dest->quadVBO, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-    shaderBindBuffers(&dest->lightingPass, 2, (struct ShaderBufferBinding[]){
-        {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = 0}, 
-        {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = sizeof(float) * 3}},
+    shaderBindBuffers(&dest->lightingPass, 2, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = 0}, {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = sizeof(float) * 3}},
                       dest->quadVBO);
 
     return ok();
@@ -159,19 +165,19 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
 
 struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4 projection, mat4 view)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, self->fbo); 
+    glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaderPrepareForDraw(&self->geometryPass);
     shaderSetMat4(&self->geometryPass, "projection", projection);
     shaderSetMat4(&self->geometryPass, "view", view);
-    
+
     struct Mesh *mesh = NULL;
     // geometry pass
     for (index_t i = 0; i < self->geometryPass.meshCount; i++)
     {
         mesh = dynamicArrayGet(self->geometryPass.meshes, i);
-        if (mesh->isLoading)
+        if (mesh->isLoading && !mesh->isGenerating)
         {
             meshCopyData(mesh);
         }
@@ -186,7 +192,7 @@ struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4
         }
         else
         {
-        glDrawArrays(GL_TRIANGLES, 0, mesh->vertexCount);
+            glDrawArrays(GL_TRIANGLES, 0, mesh->vertexCount);
         }
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -296,10 +302,59 @@ struct Result engineCreate(struct Engine *dest)
     cubeDefferedRendererCreate(*dest, &dest->cubeDefferedRenderer);
     cubeHighlightRendererCreate(*dest, &dest->cubeHighlightRenderer);
 
+    shaderCreate(NULL, NULL, NULL, &dest->crosshair);
+    dest->crosshair.meshes = dynamicArrayCreate(DATA_TYPE_MESH, 1, sizeof(struct Mesh));
+    dest->crosshair.meshCount = 1;
+    meshCreate(
+        dest->crosshair.uniformCount,
+        dest->crosshair.uniforms, 1,
+        (struct ShaderBufferBinding[]){
+            {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 3, .offset = 0}},
+        dynamicArrayGet(dest->crosshair.meshes, 0));
+
+    glNamedBufferData(dest->crosshair.meshes[0].vertexBuffer, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+    shaderUse(&dest->crosshair);
+    shaderSetVec3(&dest->crosshair, "color", (vec3){1.0f, 1.0f, 1.0f});
+    mat4 projection2 = GLM_MAT4_IDENTITY_INIT;
+
+    //TODO pencere boyutu degistiginde projection u tekrar hesapla
+    // Assuming windowWidth and windowHeight represent your window size
+    float aspectRatio = (float)dest->window.width / (float)dest->window.height;
+
+    // Define the projection based on the aspect ratio
+    float left = -2.0f;
+    float right = 2.0f;
+    float bottom = -1.0f;
+    float top = 1.0f;
+
+    // Adjust the orthographic projection based on the aspect ratio
+    if (aspectRatio > 1.0f)
+    {
+        // Wider than tall, scale the vertical axis
+        bottom = -2.0f / aspectRatio;
+        top = 2.0f / aspectRatio;
+    }
+    else
+    {
+        // Taller than wide, scale the horizontal axis
+        left = -2.0f * aspectRatio;
+        right = 2.0f * aspectRatio;
+    }
+
+    // Apply the projection
+    glm_ortho(left, right, bottom, top, 0.0f, 100.0f, projection2);
+
+    shaderSetMat4(&dest->crosshair, "projection", projection2);
+    shaderBindBuffers(
+        &dest->crosshair,
+        dest->crosshair.meshes[0].bindingCount,
+        dest->crosshair.meshes[0].bufferBindings,
+        dest->crosshair.meshes[0].vertexBuffer);
+
     return ok();
 }
 
-struct Result engineUpdate(struct Engine *self,mat4 projection, mat4 view)
+struct Result engineUpdate(struct Engine *self, mat4 projection, mat4 view)
 {
     // TODO fix this so it shows what error it
     GLenum err;

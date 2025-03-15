@@ -34,6 +34,8 @@ struct World
     ChunkTable chunkTable;
 };
 
+struct World *worldGet();
+
 void worldCreate(struct World *dest);
 
 void worldLoadChunk(struct World *self, i4 chunkPos[2]);

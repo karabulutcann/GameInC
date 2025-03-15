@@ -9,16 +9,18 @@
 
 const char *defaultVertexShader = "#version 330 core\n"
                                   "layout (location = 0) in vec3 aPos;\n"
+                                  "uniform mat4 projection;\n"
                                   "void main()\n"
                                   "{\n"
-                                  "   gl_Position = vec4(aPos, 1.0);\n"
+                                  "   gl_Position = projection * vec4(aPos, 1.0);\n"
                                   "}\0";
 
 const char *defaultFragmentShader = "#version 330 core\n"
                                     "out vec4 FragColor;\n"
+                                    "uniform vec3 color;\n"
                                     "void main()\n"
                                     "{\n"
-                                    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                    "   FragColor = vec4(color, 1.0);\n"
                                     "}\n\0";
 
 struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, const char *geometryPath, struct Shader *dest)
@@ -29,12 +31,37 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     int success;
 
     dest->id = glCreateProgram();
-    shaderCompileAndAttach(dest->id, vertexPath, GL_VERTEX_SHADER);
-    shaderCompileAndAttach(dest->id, fragmentPath, GL_FRAGMENT_SHADER);
+
+    char *shaderCode = NULL;
+    Bool isFileUsed = FALSE;
+
+    if (vertexPath != NULL)
+    {
+        fileRead(vertexPath, &shaderCode);
+        isFileUsed = TRUE;
+    }
+    else
+    {
+        shaderCode = defaultVertexShader;
+    }
+    shaderCompileAndAttach(dest->id, shaderCode, GL_VERTEX_SHADER);
+
+    if (fragmentPath != NULL)
+    {
+        fileRead(fragmentPath, &shaderCode);
+        isFileUsed = TRUE;
+    }
+    else
+    {
+        shaderCode = defaultFragmentShader;
+    }
+    shaderCompileAndAttach(dest->id, shaderCode, GL_FRAGMENT_SHADER);
 
     if (geometryPath != NULL)
     {
-        shaderCompileAndAttach(dest->id, geometryPath, GL_GEOMETRY_SHADER);
+        fileRead(geometryPath, &shaderCode);
+        isFileUsed = TRUE;
+        shaderCompileAndAttach(dest->id, shaderCode, GL_GEOMETRY_SHADER);
     }
 
     glLinkProgram(dest->id);
@@ -89,14 +116,24 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     }
 
     glCreateVertexArrays(1, &dest->vertexArrayObject);
-
+    if (isFileUsed)
+    {
+        free(shaderCode);
+    }
+    
     return ok();
 }
 
 // TODO return a result
-void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shaderType)
+void shaderCompileAndAttach(unsigned int shaderId, const char *shaderCode, GLenum shaderType)
 {
-    char *shaderCode;
+
+    if (shaderCode == NULL)
+    {
+        mError("Shader code cant be null");
+        exit(1);
+    }
+
     i4 success;
     const char *shaderTypeName = NULL;
 
@@ -115,8 +152,6 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
         mError("Unknown shader type\n");
         exit(1);
     }
-
-    CACHE_RESULT(fileRead(path, &shaderCode), FATAL);
 
     u4 shader = glCreateShader(shaderType);
     glShaderSource(shader, 1, &shaderCode, NULL);
@@ -138,7 +173,6 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shad
     glAttachShader(shaderId, shader);
 
     glDeleteShader(shader);
-    free(shaderCode);
 }
 
 void shaderBindBuffers(struct Shader *self, count_t bindingCount, struct ShaderBufferBinding *bindings, GlVertexBuffer buffer)
@@ -148,11 +182,11 @@ void shaderBindBuffers(struct Shader *self, count_t bindingCount, struct ShaderB
     for (index_t i = 0; i < bindingCount; i++)
     {
         glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, bindings[i].valueCount, bindings[i].type, bindings[i].normalized,bindings[i].stride , bindings[i].offset);
+        glVertexAttribPointer(i, bindings[i].valueCount, bindings[i].type, bindings[i].normalized, bindings[i].stride, bindings[i].offset);
     }
 }
 
-void shaderBindUniforms(struct Shader* self,count_t uniformCount, struct Uniform* uniforms)
+void shaderBindUniforms(struct Shader *self, count_t uniformCount, struct Uniform *uniforms)
 {
     for (index_t i = 0; i < uniformCount; i++)
     {
@@ -222,6 +256,11 @@ void shaderSetVec3(struct Shader *self, const char *name, vec3 value)
 void shaderSetVec3Arr(struct Shader *self, const char *name, size_t arrSize, vec3 value)
 {
     glProgramUniform3fv(self->id, glGetUniformLocation(self->id, name), arrSize, value);
+}
+
+void shaderSetVec4(struct Shader *self, const char *name, vec4 value)
+{
+    glProgramUniform4fv(self->id, glGetUniformLocation(self->id, name), 1, value);
 }
 
 void shaderSetMat4(struct Shader *self, const char *name, mat4 value)

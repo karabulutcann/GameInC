@@ -50,6 +50,7 @@ struct Mesh{
 
     Bool isIndexed;
     Bool isInUse;
+    Bool isGenerating;
     Bool isLoading;
 };
 

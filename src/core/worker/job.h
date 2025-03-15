@@ -45,8 +45,12 @@ void jobQueuePushToStart(struct JobQueue *self, struct Job job);
 
 void jobQueuePushToEnd(struct JobQueue *self, struct Job job);
 
-void jobQueuePopFromStart(struct JobQueue *self);
+void jobQueuePushNodeToEnd(struct JobQueue *self, struct JobQueueNode *node);
 
-void jobQueuePopFromEnd(struct JobQueue *self);
+struct JobQueueNode* jobQueuePopFromStart(struct JobQueue *self);
+
+struct JobQueueNode* jobQueuePopFromEnd(struct JobQueue *self);
+
+struct Result jobQueueRemoveFromStart(struct JobQueue *self);
 
 struct Result jobQueueRemove(struct JobQueue *self, id_t id);

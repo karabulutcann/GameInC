@@ -26,6 +26,7 @@ struct Engine{
     struct Window window;
     struct CubeDefferedRenderer cubeDefferedRenderer;
     struct CubeHighlightRenderer cubeHighlightRenderer;
+    struct Shader crosshair;
     f4 deltaTime;
     f4 lastFrame;
 };

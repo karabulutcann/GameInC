@@ -40,7 +40,7 @@ struct Shader{
 
 struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, const char *geometryPath, struct Shader *dest);
 
-void shaderCompileAndAttach(unsigned int shaderId, const char *path, GLenum shaderType);
+void shaderCompileAndAttach(unsigned int shaderId, const char *shaderCode, GLenum shaderType);
 
 void shaderBindBuffers(struct Shader *self,count_t bindingCount,struct ShaderBufferBinding* bindings,GlVertexBuffer buffer);
 
@@ -62,6 +62,8 @@ void shaderSetFloat(struct Shader* self,const char* name,float value);
 void shaderSetVec3(struct Shader* self,const char* name,vec3 value);
 
 void shaderSetVec3Arr(struct Shader* self, const char *name,size_t arrSize,vec3 value);
+
+void shaderSetVec4(struct Shader* self,const char* name,vec4 value);
 
 void shaderSetMat4(struct Shader* self, const char *name, mat4 value);
 
