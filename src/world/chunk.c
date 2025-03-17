@@ -1,7 +1,7 @@
 #include "chunk.h"
 #include "core/log.h"
 #include "engine/engine.h"
-#include "memory.h"
+#include <memory.h>
 
 #define FNL_IMPL
 #include <FastNoiseLight/FastNoiseLite.h>
@@ -11,6 +11,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
     memset(dest, 0, sizeof(struct Chunk));
     dest->position[0] = chunkPos[0];
     dest->position[1] = chunkPos[1];
+    dest->isLoading = TRUE;
     // TODO turn this into stack array
     dest->blockTypeArr = malloc(CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(u1));
     struct Mesh *mesh;
@@ -19,6 +20,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
         if(!mesh->isInUse){
             dest->mesh = mesh;
             mesh->isInUse = TRUE;
+            mesh->isLoading = TRUE;
             break;
         }
     }
@@ -73,6 +75,8 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
             }
         }
     }
+    dest->mesh->isLoading = FALSE;
+    dest->isLoading = FALSE;
 }
 
 void chunkDestroy(struct Chunk *chunk)

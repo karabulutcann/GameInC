@@ -1,9 +1,7 @@
 #include "core/worker/thread.h"
 #include "core/worker/boss.h"
 
-
-static struct ThreadManager* staticThreadManager;
-
+static struct ThreadManager *staticThreadManager;
 
 void bossCreate(struct Boss *dest)
 {
@@ -29,25 +27,43 @@ struct Result bossHireWorker(struct Boss *self)
     return ok();
 }
 
-void bossAssignJob(struct Boss *self, struct Job job)
+void bossAssignJob(struct Boss *self, struct Job* job)
 {
-    if (job.isRequireMainThread)
+    if (job->isRequireMainThread)
     {
         jobQueuePushToEnd(&self->jobQueue, job);
     }
     else
     {
-        count_t leastJobCount = 0;
         index_t workerIndex = 0;
+        count_t leastJobCount = 0;
         for (count_t i = 0; i < self->workerCount; i++)
         {
-            if (self->workers[i].jobQueue.length < leastJobCount)
+            if (self->workers[i].jobQueue.count < leastJobCount)
             {
-                leastJobCount = self->workers[i].jobQueue.length;
+                leastJobCount = self->workers[i].jobQueue.count;
                 workerIndex = i;
             }
         }
         jobQueuePushToEnd(&self->workers[workerIndex].jobQueue, job);
+    }
+}
+
+void bossWaitForAllJobs(struct Boss *self)
+{
+    mDebug("Waiting for jobs to finish\n");
+    Bool isAllJobsDone = FALSE;
+    while (!isAllJobsDone)
+    {
+        isAllJobsDone = TRUE;
+        for (count_t i = 0; i < self->workerCount; i++)
+        {
+            if (self->workers[i].jobQueue.count > 0)
+            {
+                isAllJobsDone = FALSE;
+            }
+        }
+        Sleep(100);
     }
 }
 

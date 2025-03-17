@@ -20,7 +20,7 @@ struct ShaderBufferBinding{
     GLenum type;
     GLboolean normalized;
     size_t stride;
-    size_t offset;
+    const GLvoid *offset;
 };
 
 struct Uniform{
@@ -44,13 +44,13 @@ struct Mesh{
     GlVertexBuffer vertexBuffer;
 
     count_t indexCount;
-    u4 indexBufferObject;
+    GlIndexBuffer indexBufferObject;
 
     struct TempMesh* tempMesh;
 
     Bool isIndexed;
     Bool isInUse;
-    Bool isGenerating;
+    Bool isCopied;
     Bool isLoading;
 };
 

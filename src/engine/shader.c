@@ -75,7 +75,7 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
         return mErr(format("Shader linking failed: %s\n", infoLog));
     }
 
-    i4 attributeCount;
+    GLint attributeCount;
     glGetProgramiv(dest->id, GL_ACTIVE_ATTRIBUTES, &attributeCount);
     mDebug("Active Attribute count: %d\n", attributeCount);
     dest->attributeCount = attributeCount;
@@ -83,7 +83,7 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     for (index_t i = 0; i < attributeCount; i++)
     {
         char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
-        size_t written = 0;
+        GLsizei written = 0;
         GLint size = 0;
         GLenum type = 0;
         glGetActiveAttrib(dest->id, (GLuint)i, MAX_SHADER_VARIABLE_NAME_LENGTH, &written, &size, &type, name);
@@ -97,7 +97,7 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
 
     // eger uniformlar shaderda kullanilmiyosa yada out degerlerini degistirmiyosa active sayilmiyo
     // oyuzden tum uniformlar gorunmuyor
-    i4 uniformCount;
+    GLint uniformCount;
     glGetProgramiv(dest->id, GL_ACTIVE_UNIFORMS, &uniformCount);
     mDebug("Active Uniform count: %d\n", uniformCount);
     dest->uniformCount = uniformCount;
@@ -105,7 +105,7 @@ struct Result shaderCreate(const char *vertexPath, const char *fragmentPath, con
     for (index_t i = 0; i < uniformCount; i++)
     {
         char name[MAX_SHADER_VARIABLE_NAME_LENGTH];
-        size_t written = 0;
+        GLsizei written = 0;
         GLint size = 0;
         GLenum type = 0;
         glGetActiveUniform(dest->id, (GLuint)i, MAX_SHADER_VARIABLE_NAME_LENGTH, &written, &size, &type, name);
@@ -134,7 +134,7 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *shaderCode, GLenu
         exit(1);
     }
 
-    i4 success;
+    GLint success;
     const char *shaderTypeName = NULL;
 
     switch (shaderType)
@@ -161,7 +161,7 @@ void shaderCompileAndAttach(unsigned int shaderId, const char *shaderCode, GLenu
 
     if (!success)
     {
-        size_t infoLogSizeWithoutNull = 0;
+        GLsizei infoLogSizeWithoutNull = 0;
         glGetShaderInfoLog(shader, 0, &infoLogSizeWithoutNull, NULL);
         // TODO change this with custom string
         char *infoLog = malloc(infoLogSizeWithoutNull + 1);

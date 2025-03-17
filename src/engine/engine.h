@@ -17,7 +17,7 @@ struct CubeDefferedRenderer {
 struct CubeHighlightRenderer {
     struct Shader highlightPass;
     GlVertexBuffer VBO;
-    u4 EBO;
+    GlIndexBuffer EBO;
 };
 
 struct Result cubeHighlightRendererUpdate(struct CubeHighlightRenderer *self, mat4 projection, mat4 view, i4 chunkPos[2] ,i4 blockPos[3]);

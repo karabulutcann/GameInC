@@ -19,7 +19,7 @@
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
 
-volatile struct Camera camera;
+struct Camera camera;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -35,7 +35,6 @@ int main()
     bossCreate(&boss);
     bossHireWorker(&boss);
     // bossHireWorker(&boss);
-
     // TODO stack overflow oluyo arraylar cok buyuk tum buyuk arraylari heapden olustur
     struct Engine engine = {0};
     engineCreate(&engine);
@@ -46,26 +45,54 @@ int main()
     struct ChunkGenerator chunkGenerator = {0};
     chunkGeneratorCreate(&chunkGenerator);
 
-    struct Chunk chunk = {0};
-    chunkCreate((i4[2]){0, 0}, &chunk);
-    chunkTableInsert(world.chunkTable, (i4[2]){0, 0}, chunk);
-    chunkGeneratorGenerateMesh(&chunkGenerator, &world, (i4[2]){0, 0});
+    // struct Chunk chunk = {0};
+    // chunkCreate((i4[2]){0, 0}, &chunk);
+    // chunkTableInsert(world.chunkTable, (i4[2]){0, 0}, chunk);
+    // chunkGeneratorGenerateMesh(&chunkGenerator, &world, (i4[2]){0, 0});
 
-    // for (index_t x = -LOAD_DISTANCE; x < LOAD_DISTANCE * 2 + 1; x++)
+    for (i8 x = -LOAD_DISTANCE; x < LOAD_DISTANCE; x++)
+    {
+        for (i8 z = -LOAD_DISTANCE; z < LOAD_DISTANCE; z++)
+        {
+            i4 *data = malloc(sizeof(i4[2]));
+            data[0] = x;
+            data[1] = z;
+            struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, LOAD_CHUNK);
+            bossAssignJob(&boss, job);
+        }
+    }
+
+    for (i8 x = -LOAD_DISTANCE; x < LOAD_DISTANCE; x++)
+    {
+        for (i8 z = -LOAD_DISTANCE; z < LOAD_DISTANCE; z++)
+        {
+            i4 *data = malloc(sizeof(i4[2]));
+            data[0] = x;
+            data[1] = z;
+            struct Job *job = jobCreate(NULL, (Allocated)data, FALSE, GENERATE_MESH);
+            bossAssignJob(&boss, job);
+        }
+    }
+
+    // for (i8 x = 0; x < 2; x++)
     // {
-    //     for (index_t z = -LOAD_DISTANCE; z < LOAD_DISTANCE * 2 + 1; z++)
-    //     {
-    //         bossAssignJob(&boss, (struct Job){.func = staticWorldLoadChunk, .data = (void *)(i4[2]){x, z}, .type = LOAD_CHUNK});
-    //     }
+    //     i4 *data = malloc(sizeof(i4[2]));
+    //     data[0] = x;
+    //     data[1] = 0;
+    //     struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, LOAD_CHUNK);
+    //     bossAssignJob(&boss, job);
     // }
 
-    // for (index_t x = -LOAD_DISTANCE; x < LOAD_DISTANCE * 2 + 1; x++)
+    // for (i8 x = 0; x < 2; x++)
     // {
-    //     for (index_t z = -LOAD_DISTANCE; z < LOAD_DISTANCE * 2 + 1; z++)
-    //     {
-    //         bossAssignJob(&boss, (struct Job){.func = NULL, .data = (void *)(i4[2]){0, 0}, .type = GENERATE_MESH});
-    //     }
+    //     i4 *data = malloc(sizeof(i4[2]));
+    //     data[0] = x;
+    //     data[1] = 0;
+    //     struct Job *job = jobCreate(NULL, (Allocated)data, FALSE, GENERATE_MESH);
+    //     bossAssignJob(&boss, job);
     // }
+
+    // bossWaitForAllJobs(&boss);
 
     CACHE_RESULT(mCameraCreate(&camera));
 
@@ -74,7 +101,11 @@ int main()
     while (!windowShouldClose(&engine.window))
     {
         struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
-        RaycastHit hit = RaycastBlock((vec3){camera.position[0] + 0.00f, camera.position[1] + 0.4f, camera.position[2]}, camera.front, chunk);
+        RaycastHit hit = {0};
+        if (chunk != NULL && !chunk->isLoading)
+        {
+            hit = RaycastBlock((vec3){camera.position[0] + 0.00f, camera.position[1] + 0.4f, camera.position[2]}, camera.front, chunk);
+        }
 
         if (inputGetKeyPressedOnce(&engine.window, MOUSE_LEFT) && engine.window.isMouseLocked)
         {
@@ -82,9 +113,11 @@ int main()
             {
                 mDebug("hit to %d\n", hit.index);
                 chunk->blockTypeArr[hit.index] = 0;
-                bossAssignJob(&boss, (struct Job){
-                                         .data = (i4[2]){0, 0},
-                                         .type = GENERATE_MESH});
+                i4 *data = malloc(sizeof(i4[2]));
+                data[0] = 0;
+                data[1] = 0;
+                struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, GENERATE_MESH);
+                bossAssignJob(&boss, job);
                 // worldGenerateChunkMesh(&world, (i4[2]){0, 0});
             }
         }

@@ -1,6 +1,6 @@
 #include "engine.h"
 #include "core/log.h"
-#include "world/world.h"
+#include "camera.h"
 
 const float clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -106,7 +106,10 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
     {
         meshCreate(dest->geometryPass.uniformCount,
                    dest->geometryPass.uniforms,
-                   3, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0}, {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = sizeof(float) * 3}, {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = sizeof(float) * 6}}, dynamicArrayGet(dest->geometryPass.meshes, i));
+                   3, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0}, 
+                   {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = (GLvoid*)(sizeof(float) * 3)},
+                   {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = (GLvoid*)(sizeof(float) * 6)}},
+                   dynamicArrayGet(dest->geometryPass.meshes, i));
     }
 
     glCreateFramebuffers(1, &dest->fbo);
@@ -157,7 +160,10 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
     glCreateBuffers(1, &dest->quadVBO);
     glNamedBufferData(dest->quadVBO, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-    shaderBindBuffers(&dest->lightingPass, 2, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = 0}, {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = sizeof(float) * 3}},
+    shaderBindBuffers(&dest->lightingPass, 2, 
+        (struct ShaderBufferBinding[]){
+            {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = 0},
+             {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = (GLvoid*)(sizeof(float) * 3)}},
                       dest->quadVBO);
 
     return ok();
@@ -173,11 +179,16 @@ struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4
     shaderSetMat4(&self->geometryPass, "view", view);
 
     struct Mesh *mesh = NULL;
+    
     // geometry pass
     for (index_t i = 0; i < self->geometryPass.meshCount; i++)
     {
         mesh = dynamicArrayGet(self->geometryPass.meshes, i);
-        if (mesh->isLoading && !mesh->isGenerating)
+        if(mesh == NULL || !mesh->isInUse || mesh->vertexCount == 0){
+            continue;
+        }
+
+        if (!mesh->isCopied && !mesh->isLoading)
         {
             meshCopyData(mesh);
         }
@@ -256,6 +267,7 @@ struct Result cubeHighlightRendererCreate(struct Engine engine, struct CubeHighl
     shaderBindBuffers(&dest->highlightPass, 1, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 3, .offset = 0}},
                       dest->VBO);
     glLineWidth(2);
+    return ok();
 }
 
 struct Result cubeHighlightRendererUpdate(struct CubeHighlightRenderer *self, mat4 projection, mat4 view, i4 chunkPos[2], i4 blockPos[3])
@@ -317,8 +329,8 @@ struct Result engineCreate(struct Engine *dest)
     shaderSetVec3(&dest->crosshair, "color", (vec3){1.0f, 1.0f, 1.0f});
     mat4 projection2 = GLM_MAT4_IDENTITY_INIT;
 
-    //TODO pencere boyutu degistiginde projection u tekrar hesapla
-    // Assuming windowWidth and windowHeight represent your window size
+    // TODO pencere boyutu degistiginde projection u tekrar hesapla
+    //  Assuming windowWidth and windowHeight represent your window size
     float aspectRatio = (float)dest->window.width / (float)dest->window.height;
 
     // Define the projection based on the aspect ratio

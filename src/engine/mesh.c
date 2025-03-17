@@ -16,9 +16,9 @@ void meshCreate(count_t uniformCount, struct Uniform *meshUniforms, count_t bind
 void meshCopyData(struct Mesh *self)
 {
     glNamedBufferData(self->vertexBuffer, self->vertexCount * sizeof(f4) * CUBE_VERTEX_SIZE, self->tempMesh->mesh, GL_STATIC_DRAW);
-    self->isLoading = FALSE;
     self->tempMesh->isFree = TRUE;
     self->tempMesh = NULL;
+    self->isCopied = TRUE;
 }
 
 void meshSetUniform(struct Mesh *self, const char *name, size_t size, void *data)

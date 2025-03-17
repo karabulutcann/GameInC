@@ -23,23 +23,23 @@ struct TempMesh* chunkGeneratorGetTempMesh(struct ChunkGenerator *self){
     return NULL;
 }
 
-struct Result chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct World* world, i4 chunkPos[2]){
+Bool chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct World* world, i4 chunkPos[2]){
 
     struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkPos);
     if (chunk == NULL)
     {
-        return;
+        return FALSE;
     }
 
     struct TempMesh *tempMesh = chunkGeneratorGetTempMesh(self);
     if(tempMesh == NULL)
     {
         mDebug("ChunkGenerator: No free temp meshes");
-        return;
+        return FALSE;
     }
 
     chunk->mesh->isLoading = TRUE;
-    chunk->mesh->isGenerating = TRUE;
+    //TODO probably dont need this
     chunk->isLoading = TRUE;
     count_t totalWritten = 0;
 
@@ -65,10 +65,13 @@ struct Result chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct Wor
 
     meshSetUniform(chunk->mesh, "model", sizeof(mat4), model);
 
+    tempMesh->totalWritten = totalWritten;
     chunk->mesh->vertexCount = totalWritten;
     chunk->mesh->tempMesh = tempMesh;
     chunk->isLoading = FALSE;
-    chunk->mesh->isGenerating = FALSE;
+    chunk->mesh->isCopied = FALSE;
+    chunk->mesh->isLoading = FALSE;
+    return TRUE;
 }
 
 void chunkGeneratorDestroy(struct ChunkGenerator *self){    

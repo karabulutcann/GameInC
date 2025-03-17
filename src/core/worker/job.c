@@ -1,10 +1,23 @@
 #include "core/worker/job.h"
 #include "memory.h"
 
-void jobCreate(void (*func)(void *), void *data, struct Job *dest)
+
+static count_t lastId = 0;
+
+struct Job* jobCreate(JobFunc func, Allocated data, Bool isRequireMainThread, enum JobType type)
 {
-    dest->func = func;
-    dest->data = data;
+    struct Job *job = malloc(sizeof(struct Job));
+    if (job == NULL)
+    {
+        return NULL;
+    }
+    memset(job, 0, sizeof(struct Job));
+    job->func = func;
+    job->data = data;
+    job->isRequireMainThread = isRequireMainThread;
+    job->type = type;
+    job->id = lastId++;
+    return job;
 }
 
 void jobExecute(struct Job *self)
@@ -12,13 +25,13 @@ void jobExecute(struct Job *self)
     self->func(self->data);
 }
 
-struct JobQueueNode *jobQueueNodeCreate(struct Job job, id_t id)
-{
-    struct JobQueueNode *node = malloc(sizeof(struct JobQueueNode));
-    memset(node, 0, sizeof(struct JobQueueNode));
-    node->id = id;
-    node->job = job;
-    return node;
+void JobDestroy(struct Job *self){
+    if(self != NULL){
+        if(self->data != NULL){
+            free(self->data);
+        }
+        free(self);
+    }
 }
 
 struct JobQueue jobQueueCreate()
@@ -27,9 +40,8 @@ struct JobQueue jobQueueCreate()
     return queue;
 }
 
-void jobQueuePushToStart(struct JobQueue *self, struct Job job)
+void jobQueuePushToStart(struct JobQueue *self, struct Job *node)
 {
-    struct JobQueueNode *node = jobQueueNodeCreate(job, self->lastId++);
     if (self->head == NULL)
     {
         self->head = node;
@@ -44,10 +56,10 @@ void jobQueuePushToStart(struct JobQueue *self, struct Job job)
         self->head->prev = node;
         self->head = node;
     }
-    self->length++;
+    self->count++;
 }
 
-void jobQueuePushNodeToEnd(struct JobQueue *self, struct JobQueueNode *node){
+void jobQueuePushToEnd(struct JobQueue *self, struct Job *node){
     if (self->head == NULL)
     {
         self->head = node;
@@ -62,82 +74,72 @@ void jobQueuePushNodeToEnd(struct JobQueue *self, struct JobQueueNode *node){
         self->tail->next = node;
         self->tail = node;
     }
-    self->length++;
-}
-
-void jobQueuePushToEnd(struct JobQueue *self, struct Job job)
-{
-    struct JobQueueNode *node = jobQueueNodeCreate(job, self->lastId++);
-    jobQueuePushNodeToEnd(self, node);
+    self->count++;
 }
 
 //returned value must be freed or pushed to the queue again
-struct JobQueueNode *jobQueuePopFromStart(struct JobQueue *self)
+struct Job *jobQueuePopFromStart(struct JobQueue *self)
 {
     if (self->head == NULL)
     {
-        return;
+        return NULL;
     }
-    struct JobQueueNode *node = self->head;
-    if (self->length == 1)
+    struct Job *node = self->head;
+    if (self->count == 1)
     {
         self->head = NULL;
         self->tail = NULL;
     }else{
         self->head = self->head->next;
-        if (self->length == 2)
+        if (self->count == 2)
         {
             self->tail = self->head;
         }
         self->head->prev = NULL;
     }
-    self->length--;
+    self->count--;
     return node;
 }
 
 //returned value must be freed or pushed to the queue again
-struct JobQueueNode *jobQueuePopFromEnd(struct JobQueue *self)
+struct job *jobQueuePopFromEnd(struct JobQueue *self)
 {
-
     if (self->tail == NULL)
     {
         return NULL;
     }
-    struct JobQueueNode *node = self->tail;
-    if (self->length == 1)
+    struct Job *node = self->tail;
+    if (self->count == 1)
     {
         self->head = NULL;
         self->tail = NULL;
     }
     self->tail = self->tail->prev;
-    if (self->length == 2)
+    if (self->count == 2)
     {
         self->head = self->tail;
     }
     self->tail->next = NULL;
-    self->length--;
-
+    self->count--;
     return node;
 }
 
 // removes and frees the first node in the queue
 struct Result jobQueueRemoveFromStart(struct JobQueue *self){
-    struct JobQueueNode *node = jobQueuePopFromStart(self);
-    if(node != NULL){
-        free(node);
-        return ok();
-    }
+    struct Job *node = jobQueuePopFromStart(self);
+    JobDestroy(node);
+    return ok();
 }   
 
 struct Result jobQueueRemove(struct JobQueue *self, id_t id)
 {
-    struct JobQueueNode *node = self->head;
+    struct Job *node = self->head;
     while (node != NULL)
     {
         if (node->id == id)
         {
-            struct JobQueueNode *next = node->next;
-            struct JobQueueNode *prev = node->prev;
+            struct Job *next = node->next;
+            struct Job *prev = node->prev;
             if (prev != NULL)
             {
                 prev->next = next;
@@ -154,8 +156,8 @@ struct Result jobQueueRemove(struct JobQueue *self, id_t id)
             {
                 self->tail = prev;
             }
-            free(node);
-            self->length--;
+            JobDestroy(node);
+            self->count--;
             return ok();
         }
         node = node->next;

@@ -6,7 +6,6 @@
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/test/**",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/packages/**"
             ],
             "defines": [
             ],

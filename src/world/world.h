@@ -42,7 +42,7 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2]);
 
 void worldUnloadChunk(struct World *self, i4 chunkPos[2]);
 
-Bool staticWorldLoadChunk(i4 chunkPos[2]);
+Bool staticWorldLoadChunk(void* chunkPos);
 
 // void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2]);
 

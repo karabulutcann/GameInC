@@ -1,6 +1,5 @@
 #pragma once
 #include "core/core.h"
-#include "world/chunk.h"
 #include "world/world.h"
 
 //TODO hem mesh.h da hemde burda tanimliyosun duzelt
@@ -25,6 +24,6 @@ struct ChunkGenerator{
 void chunkGeneratorCreate(struct ChunkGenerator *dest);
 struct TempMesh* chunkGeneratorGetTempMesh(struct ChunkGenerator *self);
 
-struct Result chunkGeneratorGenerateMesh(struct ChunkGenerator *self,struct World* world, i4 chunkPos[2]);
+Bool chunkGeneratorGenerateMesh(struct ChunkGenerator *self,struct World* world, i4 chunkPos[2]);
 
 void chunkGeneratorDestroy(struct ChunkGenerator *self);

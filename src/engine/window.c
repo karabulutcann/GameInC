@@ -169,5 +169,6 @@ struct Result windowDestroy(struct Window *window)
 #ifdef USE_GLFW
     glfwTerminate();
 #endif
+  return ok();
 }
 

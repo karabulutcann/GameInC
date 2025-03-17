@@ -9,28 +9,27 @@ void workerCreate(struct Worker *dest)
     dest->isRunning = TRUE;
 }
 
-void workerFunction(struct Worker *self)
+void workerFunction(void *data)
 {
+    struct Worker* self = data;
     struct ChunkGenerator chunkGenerator = {0};
     chunkGeneratorCreate(&chunkGenerator);
     Bool isJobDone = FALSE;
     while (self->isRunning)
     {
-        if (self->jobQueue.length > 0)
+        if (self->jobQueue.count > 0)
         {
             isJobDone = FALSE;
-            switch (self->jobQueue.head->job.type)
+            switch (self->jobQueue.head->type)
             {
-            case LOAD_CHUNK:
-                break;
+
             case GENERATE_MESH:
                 struct World *world = worldGet();
-                mDebug("ChunkGenerator: Loading chunk");
-                chunkGeneratorGenerateMesh(&chunkGenerator, world, self->jobQueue.head->job.data);
-                isJobDone = TRUE;
+                isJobDone = chunkGeneratorGenerateMesh(&chunkGenerator, world, self->jobQueue.head->data);
                 break;
+            case LOAD_CHUNK:
             default:
-                isJobDone = self->jobQueue.head->job.func(self->jobQueue.head->job.data);
+                isJobDone = self->jobQueue.head->func(self->jobQueue.head->data);
                 break;
             }
             // TODO if job is not done push the job to the end of the queue
@@ -40,7 +39,7 @@ void workerFunction(struct Worker *self)
             }
             else
             {
-                jobQueuePushNodeToEnd(&self->jobQueue, jobQueuePopFromStart(&self->jobQueue));
+                jobQueuePushToEnd(&self->jobQueue, jobQueuePopFromStart(&self->jobQueue));
             }
         }
     }

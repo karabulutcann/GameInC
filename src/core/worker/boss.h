@@ -15,6 +15,8 @@ void bossCreate(struct Boss *dest);
 
 struct Result bossHireWorker(struct Boss *self);
 
-void bossAssignJob(struct Boss *self, struct Job job);
+void bossAssignJob(struct Boss *self, struct Job* job);
+
+void bossWaitForAllJobs(struct Boss *self);
 
 void bossDestroy(struct Boss *self);

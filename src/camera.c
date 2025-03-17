@@ -1,6 +1,4 @@
 #include "camera.h"
-#include "world/chunk.h"
-#include "world/world.h"
 #include <math.h>
 
 static struct Camera* staticCamera;

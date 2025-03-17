@@ -2,20 +2,7 @@
 #include "core/core.h"
 #include "engine/window.h"
 #include "camera.h"
-#include <cglm/cglm.h>
-
-enum InputKey
-{
-    KEY_W,
-    KEY_S,
-    KEY_A,
-    KEY_D,
-    KEY_SPACE,
-    KEY_ESC,
-    KEY_LEFT_SHIFT,
-    MOUSE_LEFT,
-    MOUSE_RIGHT,
-};
+#include <cglm/cglm.h> 
 
 void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera);
 

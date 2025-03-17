@@ -1,6 +1,5 @@
 #pragma once
 #include "core/core.h"
-#include "input.h"
 
 #define USE_GLFW
 
@@ -16,7 +15,18 @@ struct Window
     Bool isMouseLocked;
     GLFWwindow *windowHandle;
 };
-
+enum InputKey
+{
+    KEY_W,
+    KEY_S,
+    KEY_A,
+    KEY_D,
+    KEY_SPACE,
+    KEY_ESC,
+    KEY_LEFT_SHIFT,
+    MOUSE_LEFT,
+    MOUSE_RIGHT,
+};
 #define KEY_DOWN TRUE
 #define KEY_UP FALSE
 

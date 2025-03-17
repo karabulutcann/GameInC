@@ -2,7 +2,6 @@
 #include <windows.h>
 #include "core/core.h"
 #include "core/result.h"
-#include "core/log.h"
 
 
 // Constants for thread demo

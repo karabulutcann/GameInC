@@ -1,6 +1,7 @@
 #pragma once
-#include "cglm/cglm.h"
+#include <cglm/cglm.h>
 #include "core/result.h"
+#include "world/chunk.h"
 
 struct Camera {
     vec3 position;

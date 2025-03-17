@@ -6,7 +6,7 @@
 
 #define sizeVertex 0.2f
 
-const static struct World* staticWorld;
+static struct World* staticWorld;
 
 const float cubeVertices[] = {
     // Back face
@@ -84,8 +84,12 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2])
     }
 }
 
-Bool staticWorldLoadChunk(i4 chunkPos[2])
+Bool staticWorldLoadChunk(void* _chunkPos)
 {
+    i4 chunkPos[2] = {0};
+    chunkPos[0] = ((i4*)_chunkPos)[0];
+    chunkPos[1] = ((i4*)_chunkPos)[1];
+    
     struct Chunk chunk = {0};
     chunkCreate(chunkPos, &chunk);
     struct Result r = chunkTableInsert(staticWorld->chunkTable, chunkPos, chunk);
@@ -93,8 +97,9 @@ Bool staticWorldLoadChunk(i4 chunkPos[2])
     {
         chunkDestroy(&chunk);
         CACHE_RESULT(r);
-        return TRUE;
+        return FALSE;
     }
+    return TRUE;
 }
 
 void worldUnloadChunk(struct World *self, i4 chunkPos[2])

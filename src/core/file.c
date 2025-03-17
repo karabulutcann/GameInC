@@ -16,7 +16,6 @@ struct Result fileRead(const char *path, char **buffer)
 
 	*buffer = NULL;
 	
-
 	FILE *fp = fopen(path, "rb");
 	if (!fp || ferror(fp)) {
         return mErr(format("Error opening file: %s\n", path));

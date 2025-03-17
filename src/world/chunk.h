@@ -6,7 +6,6 @@
 
 struct Chunk{
     i4 position[2];
-    Bool isVboCreated;
     Bool isLoading;
     u1* blockTypeArr;
     struct Mesh* mesh;

@@ -12,8 +12,6 @@ struct ShaderAttribute{
     size_t offset;
 };
 
-
-
 struct Shader{
     u4 id;
 

@@ -57,6 +57,8 @@ typedef double f8;
 // 10 btye / 80 bit float
 typedef long double f10;
 
+typedef void* Allocated;
+
 // 8 btye / 64 bit size value
 // Use only for representing size as bytes not as value count
 // u8[3] size is 8 * 3 = 24 bytes
@@ -74,24 +76,24 @@ typedef u8 size_t;
 
 typedef u8 id_t;
 
-typedef u4 GlFrameBuffer;
+typedef GLuint GlFrameBuffer;
 
-typedef u4 GlTexture;
+typedef GLuint GlTexture;
 
-typedef u4 GlRenderBuffer;
+typedef GLuint GlRenderBuffer;
 
-typedef u4 GlVertexBuffer;
+typedef GLuint GlVertexBuffer;
+typedef GLuint GlIndexBuffer;
 
-typedef u4 GlVertexArray;
+typedef GLuint GlVertexArray;
 
 #define MAX_UNIFORM_COUNT 16
 #define MAX_ATTRIBUTE_COUNT 6
 #define MAX_SHADER_VARIABLE_NAME_LENGTH 64
 
+#define WORLD_SIZE_X 10
 
-#define WORLD_SIZE_X 60
-
-#define LOAD_DISTANCE 5
+#define LOAD_DISTANCE 1
 
 #define TOTAL_LOAD_COUNT (LOAD_DISTANCE * 2 + 1) * (LOAD_DISTANCE * 2 + 1)
 

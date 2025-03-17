@@ -5,8 +5,9 @@ struct Worker
 {
     struct JobQueue jobQueue;
     Bool isRunning;
+    Bool isWorking;
 };
 
 void workerCreate(struct Worker *dest);
 
-void workerFunction(struct Worker *self);
+void workerFunction(void* data);
