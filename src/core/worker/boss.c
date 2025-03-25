@@ -36,7 +36,7 @@ void bossAssignJob(struct Boss *self, struct Job* job)
     else
     {
         index_t workerIndex = 0;
-        count_t leastJobCount = 0;
+        count_t leastJobCount = -1;
         for (count_t i = 0; i < self->workerCount; i++)
         {
             if (self->workers[i].jobQueue.count < leastJobCount)

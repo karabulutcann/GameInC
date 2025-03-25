@@ -8,9 +8,9 @@
 #include "world/chunk_generator.h"
 #include "engine/engine.h"
 #include "core/worker/job.h"
-#include "core/worker/worker.h"
 #include "core/worker/boss.h"
 #include "input.h"
+#include "gui/gui.h"
 #include <math.h>
 #include <cglm/cglm.h>
 #include <stdio.h>
@@ -24,9 +24,8 @@ struct Camera camera;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-vec3 lightPos = {0.f, 50.0f, 0.0f};
+vec3 lightPos = {-2.0f, 50.0f, -1.0f};
 
-#define cubeSize 0.4f
 #define LOAD_RADIUS 5
 
 int main()
@@ -35,6 +34,7 @@ int main()
     bossCreate(&boss);
     bossHireWorker(&boss);
     // bossHireWorker(&boss);
+
     // TODO stack overflow oluyo arraylar cok buyuk tum buyuk arraylari heapden olustur
     struct Engine engine = {0};
     engineCreate(&engine);
@@ -45,23 +45,24 @@ int main()
     struct ChunkGenerator chunkGenerator = {0};
     chunkGeneratorCreate(&chunkGenerator);
 
-    // struct Chunk chunk = {0};
-    // chunkCreate((i4[2]){0, 0}, &chunk);
-    // chunkTableInsert(world.chunkTable, (i4[2]){0, 0}, chunk);
-    // chunkGeneratorGenerateMesh(&chunkGenerator, &world, (i4[2]){0, 0});
+    guiCreate(&engine);
 
     for (i8 x = -LOAD_DISTANCE; x < LOAD_DISTANCE; x++)
     {
         for (i8 z = -LOAD_DISTANCE; z < LOAD_DISTANCE; z++)
         {
+
             i4 *data = malloc(sizeof(i4[2]));
             data[0] = x;
             data[1] = z;
+            // staticWorldLoadChunk((Allocated)data);
             struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, LOAD_CHUNK);
             bossAssignJob(&boss, job);
         }
     }
 
+    bossWaitForAllJobs(&boss);
+
     for (i8 x = -LOAD_DISTANCE; x < LOAD_DISTANCE; x++)
     {
         for (i8 z = -LOAD_DISTANCE; z < LOAD_DISTANCE; z++)
@@ -69,57 +70,48 @@ int main()
             i4 *data = malloc(sizeof(i4[2]));
             data[0] = x;
             data[1] = z;
+            // chunkGeneratorGenerateMesh(&chunkGenerator, &world, data);
+            // meshCopyData(chunkTableGet(world.chunkTable, data)->mesh);
             struct Job *job = jobCreate(NULL, (Allocated)data, FALSE, GENERATE_MESH);
             bossAssignJob(&boss, job);
         }
     }
 
-    // for (i8 x = 0; x < 2; x++)
-    // {
-    //     i4 *data = malloc(sizeof(i4[2]));
-    //     data[0] = x;
-    //     data[1] = 0;
-    //     struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, LOAD_CHUNK);
-    //     bossAssignJob(&boss, job);
-    // }
-
-    // for (i8 x = 0; x < 2; x++)
-    // {
-    //     i4 *data = malloc(sizeof(i4[2]));
-    //     data[0] = x;
-    //     data[1] = 0;
-    //     struct Job *job = jobCreate(NULL, (Allocated)data, FALSE, GENERATE_MESH);
-    //     bossAssignJob(&boss, job);
-    // }
-
-    // bossWaitForAllJobs(&boss);
-
     CACHE_RESULT(mCameraCreate(&camera));
 
     mDebug("World loaded\n");
 
+    i4 cursorPos[3] = {0}; 
+    Bool isButtonClicked = FALSE;
+    int selectedBlock = OAK_LOG;
+
     while (!windowShouldClose(&engine.window))
     {
-        struct Chunk *chunk = chunkTableGet(world.chunkTable, (i4[2]){0, 0});
         RaycastHit hit = {0};
-        if (chunk != NULL && !chunk->isLoading)
-        {
-            hit = RaycastBlock((vec3){camera.position[0] + 0.00f, camera.position[1] + 0.4f, camera.position[2]}, camera.front, chunk);
-        }
+        hit = RaycastBlock((vec3){camera.position[0], camera.position[1], camera.position[2]}, camera.front);
 
         if (inputGetKeyPressedOnce(&engine.window, MOUSE_LEFT) && engine.window.isMouseLocked)
         {
             if (hit.hit)
             {
-                mDebug("hit to %d\n", hit.index);
-                chunk->blockTypeArr[hit.index] = 0;
+                mDebug("hit to %d %d %d \n", hit.blockPos.x, hit.blockPos.y, hit.blockPos.z);
+                staticWorldSetBlock((i4[3]){hit.blockPos.x,hit.blockPos.y,hit.blockPos.z}, 0);
                 i4 *data = malloc(sizeof(i4[2]));
-                data[0] = 0;
-                data[1] = 0;
+                getChunkPos((i4[3]){hit.blockPos.x,hit.blockPos.y,hit.blockPos.z},data);
                 struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, GENERATE_MESH);
                 bossAssignJob(&boss, job);
-                // worldGenerateChunkMesh(&world, (i4[2]){0, 0});
             }
+        }
+        
+        if (isButtonClicked)
+        {
+            mDebug("hit to %d %d %d\n", cursorPos[0], cursorPos[1], cursorPos[2]);
+            staticWorldSetBlock(cursorPos, selectedBlock);
+            i4 *data = malloc(sizeof(i4[2]));
+            getChunkPos((i4[3]){hit.blockPos.x,hit.blockPos.y,hit.blockPos.z},data);
+            struct Job *job = jobCreate(staticWorldLoadChunk, (Allocated)data, FALSE, GENERATE_MESH);
+            bossAssignJob(&boss, job);
+            isButtonClicked = FALSE;
         }
 
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
@@ -135,12 +127,22 @@ int main()
 
         if (hit.hit)
         {
-            cubeHighlightRendererUpdate(&engine.cubeHighlightRenderer, projection, view, (i4[2]){0, 0}, (i4[3]){hit.blockPos.x, hit.blockPos.y, hit.blockPos.z});
+            cubeHighlightRendererUpdate(&engine.cubeHighlightRenderer, projection, view, (i4[2]){0, 0}, (i4[3]){hit.blockPos.x, hit.blockPos.y, hit.blockPos.z},(vec3){1,0,0});
         }
+
+        cubeHighlightRendererUpdate(&engine.cubeHighlightRenderer, projection, view, (i4[2]){0, 0}, cursorPos,(vec3){1,0,0});
+
+        shaderUse(&engine.debugShader);
+        shaderSetMat4(&engine.debugShader, "projection", projection);
+        shaderSetMat4(&engine.debugShader, "view", view);
+        glBindVertexArray(engine.debugShader.vertexArrayObject);
+        glDrawArrays(GL_LINES, 0, 24);
 
         shaderUse(&engine.crosshair);
         glBindVertexArray(engine.crosshair.vertexArrayObject);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        guiUpdate(cursorPos, &isButtonClicked, &selectedBlock, engine.deltaTime);
 
         windowSwapBuffers(&engine.window);
     }
@@ -151,43 +153,7 @@ int main()
     // mDebug("Engine destroy");
     // engineDestroy(&engine);
 
+    guiDestroy();
+
     return 0;
 }
-
-// float tangents[12 * 3] = {0};
-// float bitangents[12 * 3] = {0};
-
-// for (int i = 0; i < 12; i++)
-// {
-//     vec3 v1 = {vertices[i * 24], vertices[i * 24 + 1], vertices[i * 24 + 2]};
-//     vec3 v2 = {vertices[i * 24 + 8], vertices[i * 24 + 8 + 1], vertices[i * 24 + 8 + 2]};
-//     vec3 v3 = {vertices[i * 24 + 16], vertices[i * 24 + 16 + 1], vertices[i * 24 + 16 + 2]};
-
-//     vec2 uv1 = {vertices[i * 24 + 6], vertices[i * 24 + 6 + 1]};
-//     vec2 uv2 = {vertices[i * 24 + 8 + 6], vertices[i * 24 + 8 + 6 + 1]};
-//     vec2 uv3 = {vertices[i * 24 + 16 + 6], vertices[i * 24 + 16 + 6 + 1]};
-
-//     vec3 edge1 = {0.0f, 0.0f, 0.0f};
-//     glm_vec3_sub(v2, v1, edge1);
-
-//     vec3 edge2 = {0.0f, 0.0f, 0.0f};
-//     glm_vec3_sub(v3, v1, edge2);
-
-//     vec2 deltaUV1 = {0.0f, 0.0f};
-//     glm_vec2_sub(uv2, uv1, deltaUV1);
-
-//     vec2 deltaUV2 = {0.0f, 0.0f};
-//     glm_vec2_sub(uv3, uv1, deltaUV2);
-
-//     float f = 1.0f / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1]);
-
-//     vec3 tempTangent = {
-//         f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
-//         f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
-//         f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])};
-
-//     glm_vec3_copy(tempTangent, tangents + i * 3);
-//     bitangents[i * 3] = f * (-deltaUV2[0] * edge1[0] + deltaUV1[0] * edge2[0]);
-//     bitangents[i * 3 + 1] = f * (-deltaUV2[0] * edge1[1] + deltaUV1[0] * edge2[1]);
-//     bitangents[i * 3 + 2] = f * (-deltaUV2[0] * edge1[2] + deltaUV1[0] * edge2[2]);
-// }

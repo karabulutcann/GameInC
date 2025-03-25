@@ -3,22 +3,6 @@
 #include "world/chunk.h"
 #include "FastNoiseLight/FastNoiseLite.h"
 
-// 10 dan fazla iken zorlaniyo
-
-enum BlockType
-{
-    AIR,
-    DIRT,
-    STONE,
-    GRASS,
-    OAK_PLANK,
-    OAK_LOG,
-    CRAFTING_TABLE,
-    STONE_BRICK,
-    MOSSY_STONE_BRICK,
-    CRACKED_STONE_BRICK,
-};
-
 enum Face
 {
     BACK,
@@ -45,6 +29,10 @@ void worldUnloadChunk(struct World *self, i4 chunkPos[2]);
 Bool staticWorldLoadChunk(void* chunkPos);
 
 // void worldGenerateChunkMesh(struct World *self, i4 chunkPos[2]);
+
+u4 staticWorldGetBlock(i4 worldPos[3]);
+
+Bool staticWorldSetBlock(i4 worldPos[3],u4 blockType);
 
 count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh);
 

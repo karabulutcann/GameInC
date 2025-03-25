@@ -3,12 +3,16 @@
 #include <glad/glad.h>
 
 #define CHUNK_SIZE_X 16
-#define CHUNK_SIZE_Y 32
+#define CHUNK_SIZE_Y 128
 #define CHUNK_SIZE_Z 16
+
+#define CHUNK_BLOCK_TYPE_LENGHT CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y 
 
 #define CUBE_VERTEX_SIZE 8
 
-#define cubeSize 0.4f
+#define sizeVertex 0.2f
+
+#define cubeSize sizeVertex * 2
 
 #define TRUE 1
 #define FALSE 0
@@ -93,9 +97,22 @@ typedef GLuint GlVertexArray;
 
 #define WORLD_SIZE_X 10
 
-#define LOAD_DISTANCE 1
+#define LOAD_DISTANCE 5
 
 #define TOTAL_LOAD_COUNT (LOAD_DISTANCE * 2 + 1) * (LOAD_DISTANCE * 2 + 1)
 
 #define MAX_MESH_COUNT TOTAL_LOAD_COUNT
 
+enum BlockType
+{
+    AIR,
+    DIRT,
+    STONE,
+    GRASS,
+    OAK_PLANK,
+    OAK_LOG,
+    CRAFTING_TABLE,
+    STONE_BRICK,
+    MOSSY_STONE_BRICK,
+    CRACKED_STONE_BRICK,
+};

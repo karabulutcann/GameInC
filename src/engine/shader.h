@@ -14,7 +14,6 @@ struct ShaderAttribute{
 
 struct Shader{
     u4 id;
-
     //TODO turn this into dynamic array
     struct ShaderAttribute attributes[MAX_ATTRIBUTE_COUNT];
     count_t attributeCount;

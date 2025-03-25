@@ -6,6 +6,18 @@
 #define FNL_IMPL
 #include <FastNoiseLight/FastNoiseLite.h>
 
+
+index_t getBlockIndex(i4 worldPos[3]){
+    return worldPos[1] * CHUNK_SIZE_X * CHUNK_SIZE_Z + (worldPos[2] % CHUNK_SIZE_Z) * CHUNK_SIZE_X + (worldPos[0] % CHUNK_SIZE_X);
+}
+
+void getChunkPos(i4 worldPos[3],i4 destPos[2]){
+    destPos[0] = (worldPos[0] / CHUNK_SIZE_X) ;
+    destPos[0] += (worldPos[0] > 0 ? 0 : -1);
+    destPos[1] = (worldPos[2] / CHUNK_SIZE_X);
+    destPos[1] += (worldPos[2] > 0 ? 0 : -1);
+}
+
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 {
     memset(dest, 0, sizeof(struct Chunk));
@@ -53,7 +65,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 
             // Sample noise to determine terrain height
             float height_sample = fnlGetNoise2D(&noise_state, world_x, world_z);
-            int terrain_height = 10 + (int)((height_sample * height_sample) * 50);
+            int terrain_height = 20 + (int)((height_sample * height_sample ) * 100);
             for (int y = 0; y < CHUNK_SIZE_Y; y++)
             {
                 unsigned int block_id = 0; // Default: air

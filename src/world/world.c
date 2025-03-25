@@ -1,12 +1,11 @@
 #include "world.h"
+#include "core/core.h"
 #include "core/log.h"
 #include <memory.h>
 
 #define textureAtlasSize 4
 
-#define sizeVertex 0.2f
-
-static struct World* staticWorld;
+static struct World *staticWorld;
 
 const float cubeVertices[] = {
     // Back face
@@ -58,8 +57,10 @@ const float cubeVertices[] = {
     -sizeVertex, sizeVertex, sizeVertex, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,  // bottom-left
 };
 
-struct World *worldGet(){
-    if(staticWorld == NULL){
+struct World *worldGet()
+{
+    if (staticWorld == NULL)
+    {
         mError("World not initialized");
         exit(1);
     }
@@ -69,7 +70,7 @@ struct World *worldGet(){
 void worldCreate(struct World *dest)
 {
     staticWorld = dest;
-    dest->chunkTable = chunkTableCreate(WORLD_SIZE_X * WORLD_SIZE_X); 
+    dest->chunkTable = chunkTableCreate(TOTAL_LOAD_COUNT);
 }
 
 void worldLoadChunk(struct World *self, i4 chunkPos[2])
@@ -84,12 +85,12 @@ void worldLoadChunk(struct World *self, i4 chunkPos[2])
     }
 }
 
-Bool staticWorldLoadChunk(void* _chunkPos)
+Bool staticWorldLoadChunk(void *_chunkPos)
 {
     i4 chunkPos[2] = {0};
-    chunkPos[0] = ((i4*)_chunkPos)[0];
-    chunkPos[1] = ((i4*)_chunkPos)[1];
-    
+    chunkPos[0] = ((i4 *)_chunkPos)[0];
+    chunkPos[1] = ((i4 *)_chunkPos)[1];
+
     struct Chunk chunk = {0};
     chunkCreate(chunkPos, &chunk);
     struct Result r = chunkTableInsert(staticWorld->chunkTable, chunkPos, chunk);
@@ -114,6 +115,7 @@ void worldUnloadChunk(struct World *self, i4 chunkPos[2])
     memset(chunk, 0, sizeof(struct Chunk));
 }
 
+// TODO bu fonksiyon dogrudan degeri dondurebilir duzelt
 void worldGetBlock(struct World *self, i4 chunkPos[2], i4 blockPos[3], u4 *blockType)
 {
     struct Chunk *chunk = chunkTableGet(self->chunkTable, chunkPos);
@@ -124,6 +126,27 @@ void worldGetBlock(struct World *self, i4 chunkPos[2], i4 blockPos[3], u4 *block
 
     i4 index = (blockPos[1] * CHUNK_SIZE_X * CHUNK_SIZE_Z) + (blockPos[2] * CHUNK_SIZE_X) + blockPos[0];
     *blockType = chunk->blockTypeArr[index];
+}
+
+u4 staticWorldGetBlock(i4 worldPos[3])
+{
+    u4 blockType = 0;
+    i4 chunkPos[2] = {0};
+    getChunkPos(worldPos,chunkPos);
+    worldGetBlock(staticWorld,chunkPos, (i4[3]){worldPos[0] % CHUNK_SIZE_X, worldPos[1], worldPos[2] % CHUNK_SIZE_Z}, &blockType);
+    return blockType;
+}
+
+Bool staticWorldSetBlock(i4 worldPos[3], u4 blockType)
+{
+    i4 chunkPos[2] = {0, 0};
+    getChunkPos(worldPos, chunkPos);
+    struct Chunk *chunk = chunkTableGet(staticWorld->chunkTable, chunkPos);
+    index_t blockIndex = getBlockIndex(worldPos);
+    if (chunk == NULL || worldPos[1] >= CHUNK_SIZE_Y || blockIndex > (CHUNK_BLOCK_TYPE_LENGHT))
+        return false;
+    chunk->blockTypeArr[blockIndex] = blockType;
+    return true;
 }
 
 void worldGetBlockNeighbors(struct World *self, index_t i, struct Chunk currentChunk, i4 chunkCoords[2], u4 blockCoords[3], char neighborTypes[6])
@@ -239,15 +262,20 @@ count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
         break;
 
     case GRASS:
-        if (face == TOP)
+        switch (face)
         {
+        case TOP:
             uvCoords[0] = singleBlockSize * 2;
             uvCoords[1] = singleBlockSize * 2;
-        }
-        else
-        {
+            break;
+        case BOTTOM:
+            uvCoords[0] = singleBlockSize * 0;
+            uvCoords[1] = singleBlockSize * 2;
+            break;
+        default:
             uvCoords[0] = singleBlockSize * 1;
             uvCoords[1] = singleBlockSize * 2;
+            break;
         }
         break;
     case OAK_PLANK:
@@ -267,7 +295,7 @@ count_t blockGenerateMesh(u2 face, u1 blockType, vec3 position, float *mesh)
         }
         break;
     case CRAFTING_TABLE:
-        if(face == TOP || face == BOTTOM)
+        if (face == TOP || face == BOTTOM)
         {
             uvCoords[0] = singleBlockSize * 3;
             uvCoords[1] = singleBlockSize * 3;

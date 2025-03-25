@@ -58,4 +58,4 @@ typedef struct {
     IVec3 adjacentPos; // Position for block placement
 } RaycastHit;
 
-RaycastHit RaycastBlock(vec3 origin, vec3 direction,struct Chunk* chunk);
+RaycastHit RaycastBlock(vec3 origin, vec3 direction);

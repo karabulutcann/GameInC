@@ -11,6 +11,10 @@ struct Chunk{
     struct Mesh* mesh;
 };
 
+index_t getBlockIndex(i4 chunkPos[3]);
+
+void getChunkPos(i4 worldPos[3],i4 destPos[2]);
+
 void chunkCreate(i4 chunkPos[2], struct Chunk *dest);
 
 void chunkDestroy(struct Chunk* chunk);

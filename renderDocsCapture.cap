@@ -5,7 +5,7 @@
         "commandLine": "",
         "environment": [
         ],
-        "executable": "C:\\code\\engine\\build\\Debug\\TestApp.exe",
+        "executable": "C:\\code\\engine\\build\\TestApp.exe",
         "inject": false,
         "numQueuedFrames": 0,
         "options": {

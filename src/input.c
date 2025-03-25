@@ -10,6 +10,7 @@ struct InputKeyState
     Bool keyESC;
     Bool keyLeftShift;
     Bool mouseLeft;
+    Bool mouseRight;
 };
 
 static struct InputKeyState staticKeyState;
@@ -28,7 +29,7 @@ void inputProcess(struct Window *window, f4 deltaTime, struct Camera *camera)
         f4 ypos = windowGetMouseY(window);
         if (firstMouse && xpos != 0 && ypos != 0) // initially set to true
         {
-            lastX = xpos; 
+            lastX = xpos;
             lastY = ypos;
             firstMouse = FALSE;
         }
@@ -240,6 +241,24 @@ Bool inputGetKeyPressedOnce(struct Window *window, enum InputKey key)
         else
         {
             staticKeyState.mouseLeft = FALSE;
+            return FALSE;
+        }
+    case MOUSE_RIGHT:
+        if (windowGetKey(window, key))
+        {
+            if (staticKeyState.mouseRight)
+            {
+                return FALSE;
+            }
+            else
+            {
+                staticKeyState.mouseRight = TRUE;
+                return TRUE;
+            }
+        }
+        else
+        {
+            staticKeyState.mouseRight = FALSE;
             return FALSE;
         }
     default:

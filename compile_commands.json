@@ -1,169 +1,169 @@
 [
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\camera.c.obj -c C:\\code\\engine\\src\\camera.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\camera.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\camera.c",
   "file": "C:\\code\\engine\\src\\camera.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\camera.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\core.c.obj -c C:\\code\\engine\\src\\core\\core.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\core.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\core.c",
   "file": "C:\\code\\engine\\src\\core\\core.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\core.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\data_types.c.obj -c C:\\code\\engine\\src\\core\\data_types.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\data_types.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\data_types.c",
   "file": "C:\\code\\engine\\src\\core\\data_types.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\data_types.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\dynamic_array.c.obj -c C:\\code\\engine\\src\\core\\dynamic_array.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\dynamic_array.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\dynamic_array.c",
   "file": "C:\\code\\engine\\src\\core\\dynamic_array.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\dynamic_array.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\file.c.obj -c C:\\code\\engine\\src\\core\\file.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\file.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\file.c",
   "file": "C:\\code\\engine\\src\\core\\file.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\file.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\log.c.obj -c C:\\code\\engine\\src\\core\\log.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\log.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\log.c",
   "file": "C:\\code\\engine\\src\\core\\log.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\log.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\queue.c.obj -c C:\\code\\engine\\src\\core\\queue.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\queue.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\queue.c",
   "file": "C:\\code\\engine\\src\\core\\queue.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\queue.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\result.c.obj -c C:\\code\\engine\\src\\core\\result.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\result.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\result.c",
   "file": "C:\\code\\engine\\src\\core\\result.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\result.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\safe_array.c.obj -c C:\\code\\engine\\src\\core\\safe_array.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\safe_array.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\safe_array.c",
   "file": "C:\\code\\engine\\src\\core\\safe_array.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\safe_array.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\safe_memory.c.obj -c C:\\code\\engine\\src\\core\\safe_memory.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\safe_memory.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\safe_memory.c",
   "file": "C:\\code\\engine\\src\\core\\safe_memory.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\safe_memory.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\safe_strings.c.obj -c C:\\code\\engine\\src\\core\\safe_strings.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\safe_strings.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\safe_strings.c",
   "file": "C:\\code\\engine\\src\\core\\safe_strings.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\safe_strings.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\worker\\boss.c.obj -c C:\\code\\engine\\src\\core\\worker\\boss.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\worker\\boss.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\worker\\boss.c",
   "file": "C:\\code\\engine\\src\\core\\worker\\boss.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\worker\\boss.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\worker\\job.c.obj -c C:\\code\\engine\\src\\core\\worker\\job.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\worker\\job.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\worker\\job.c",
   "file": "C:\\code\\engine\\src\\core\\worker\\job.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\worker\\job.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\worker\\mutex.c.obj -c C:\\code\\engine\\src\\core\\worker\\mutex.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\worker\\mutex.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\worker\\mutex.c",
   "file": "C:\\code\\engine\\src\\core\\worker\\mutex.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\worker\\mutex.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\worker\\thread.c.obj -c C:\\code\\engine\\src\\core\\worker\\thread.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\worker\\thread.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\worker\\thread.c",
   "file": "C:\\code\\engine\\src\\core\\worker\\thread.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\worker\\thread.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\core\\worker\\worker.c.obj -c C:\\code\\engine\\src\\core\\worker\\worker.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\core\\worker\\worker.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\core\\worker\\worker.c",
   "file": "C:\\code\\engine\\src\\core\\worker\\worker.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\core\\worker\\worker.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\engine\\engine.c.obj -c C:\\code\\engine\\src\\engine\\engine.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\engine\\engine.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\engine\\engine.c",
   "file": "C:\\code\\engine\\src\\engine\\engine.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\engine\\engine.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\engine\\mesh.c.obj -c C:\\code\\engine\\src\\engine\\mesh.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\engine\\mesh.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\engine\\mesh.c",
   "file": "C:\\code\\engine\\src\\engine\\mesh.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\engine\\mesh.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\engine\\shader.c.obj -c C:\\code\\engine\\src\\engine\\shader.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\engine\\shader.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\engine\\shader.c",
   "file": "C:\\code\\engine\\src\\engine\\shader.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\engine\\shader.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\engine\\texture.c.obj -c C:\\code\\engine\\src\\engine\\texture.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\engine\\texture.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\engine\\texture.c",
   "file": "C:\\code\\engine\\src\\engine\\texture.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\engine\\texture.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\engine\\window.c.obj -c C:\\code\\engine\\src\\engine\\window.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\engine\\window.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\engine\\window.c",
   "file": "C:\\code\\engine\\src\\engine\\window.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\engine\\window.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\gui\\gui.c.obj -c C:\\code\\engine\\src\\gui\\gui.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\gui\\gui.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\gui\\gui.c",
   "file": "C:\\code\\engine\\src\\gui\\gui.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\gui\\gui.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\input.c.obj -c C:\\code\\engine\\src\\input.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\input.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\input.c",
   "file": "C:\\code\\engine\\src\\input.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\input.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\main.c.obj -c C:\\code\\engine\\src\\main.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\main.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\main.c",
   "file": "C:\\code\\engine\\src\\main.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\main.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\world\\chunk.c.obj -c C:\\code\\engine\\src\\world\\chunk.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\world\\chunk.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\world\\chunk.c",
   "file": "C:\\code\\engine\\src\\world\\chunk.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\world\\chunk.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\world\\chunk_generator.c.obj -c C:\\code\\engine\\src\\world\\chunk_generator.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\world\\chunk_generator.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\world\\chunk_generator.c",
   "file": "C:\\code\\engine\\src\\world\\chunk_generator.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\world\\chunk_generator.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\src\\world\\world.c.obj -c C:\\code\\engine\\src\\world\\world.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\src\\world\\world.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\src\\world\\world.c",
   "file": "C:\\code\\engine\\src\\world\\world.c",
   "output": "CMakeFiles\\TestApp.dir\\src\\world\\world.c.obj"
 },
 {
   "directory": "C:/code/engine/build",
-  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang.exe -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:/code/engine/include -IC:/code/engine/src -O0 -g -Xclang -gcodeview -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -std=gnu11 -o CMakeFiles\\TestApp.dir\\lib\\glad\\glad.c.obj -c C:\\code\\engine\\lib\\glad\\glad.c",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\clang-cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_DEBUG -IC:\\code\\engine\\include -IC:\\code\\engine\\src /DWIN32 /D_WINDOWS /W3 /MDd /Zi /Ob0 /Od /RTC1 /std:c11 /FoCMakeFiles\\TestApp.dir\\lib\\glad\\glad.c.obj /FdCMakeFiles\\TestApp.dir\\ -c -- C:\\code\\engine\\lib\\glad\\glad.c",
   "file": "C:\\code\\engine\\lib\\glad\\glad.c",
   "output": "CMakeFiles\\TestApp.dir\\lib\\glad\\glad.c.obj"
 }

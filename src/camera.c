@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "world/world.h"
 #include <math.h>
 
 static struct Camera* staticCamera;
@@ -27,10 +28,10 @@ struct Result _cameraCreateDefault(struct Camera* dest){
     
     return _cameraCreate(
         (struct CameraCreateOptions){
-            .position = {0.0f, 0.0f, 3.0f},
+            .position = {2.0f, 0.8f, 2.0f}, 
             .front = {0.0f, 0.0f, -1.0f},
             .up = {0.0f, 1.0f, 0.0f},
-            .yaw = -90.0f,
+            .yaw = 90.0f,
             .pitch = 0.0f,
             .movementSpeed = 5.0f,
             .mouseSensitivity = 0.1f
@@ -75,59 +76,79 @@ struct Result cameraUpdateDirection(struct Camera* camera, float xoffset, float 
 }
 
 
-RaycastHit RaycastBlock(vec3 origin, vec3 direction,struct Chunk* chunk) {
-    IVec3 mapCheck = { (i4)floor(origin[0] / cubeSize), (i4)floor(origin[1] / cubeSize), (i4)floor(origin[2] / cubeSize) };
-   
+RaycastHit RaycastBlock(vec3 origin, vec3 direction) {
+    float maxDistance = 20.0f;
+    IVec3 mapCheck = { (i4)floor(origin[0] / (cubeSize)), (i4)floor(origin[1] / (cubeSize)), (i4)floor(origin[2] / (cubeSize)) };
     IVec3 step = {direction[0] > 0 ? 1 : -1, direction[1] > 0 ? 1 : -1, direction[2] > 0 ? 1 : -1};
 
-    Vec3 rayUnitStepSize = {
+    vec3 delta = {
         fabsf(1.0f / direction[0]),
         fabsf(1.0f / direction[1]),
         fabsf(1.0f / direction[2])
     };
 
     Vec3 rayLength1D = {
-        (step.x > 0 ? (mapCheck.x + 1) * cubeSize - origin[0] : origin[0] - mapCheck.x * cubeSize) * rayUnitStepSize.x,
-        (step.y > 0 ? (mapCheck.y + 1) * cubeSize - origin[1] : origin[1] - mapCheck.y * cubeSize) * rayUnitStepSize.y,
-        (step.z > 0 ? (mapCheck.z + 1) * cubeSize - origin[2] : origin[2] - mapCheck.z * cubeSize) * rayUnitStepSize.z
+        (step.x > 0 ? (ceilf(origin[0]) - origin[0]) : (origin[0] - floorf(origin[0]))) / fabsf(direction[0]),
+        (step.y > 0 ? (ceilf(origin[1]) - origin[1]) : (origin[1] - floorf(origin[1]))) / fabsf(direction[1]),
+        (step.z > 0 ? (ceilf(origin[2]) - origin[2]) : (origin[2] - floorf(origin[2]))) / fabsf(direction[2])
     };
 
-    // Raycasting loop
-    float maxDistance = 8.0f; // Max block reach
-    float distance = 0.0f;
-    // IVec3 lastValidPos = mapCheck;
+    float radius = maxDistance / glm_vec3_norm(direction);
 
-    while (distance < maxDistance) {
+    Bool isInRadius = TRUE;
+
+    while (isInRadius) {
         // Move along the shortest path
-        if (rayLength1D.x < rayLength1D.y && rayLength1D.x < rayLength1D.z) {
-            distance = rayLength1D.x;
+        if (rayLength1D.x < rayLength1D.y && rayLength1D.x < rayLength1D.z && rayLength1D.x < radius) {
             mapCheck.x += step.x;
-            rayLength1D.x += rayUnitStepSize.x;
-        } else if (rayLength1D.y < rayLength1D.z) {
-            distance = rayLength1D.y;
+            rayLength1D.x += delta[0];
+        } else if (rayLength1D.y < rayLength1D.z && rayLength1D.y < radius) {
             mapCheck.y += step.y;
-            rayLength1D.y += rayUnitStepSize.y;
-        } else {
-            distance = rayLength1D.z;
+            rayLength1D.y += delta[1];
+        } else if(rayLength1D.z < radius) {
             mapCheck.z += step.z;
-            rayLength1D.z += rayUnitStepSize.z;
-        }
-
-        // Ensure it's within chunk bounds
-        if (mapCheck.x < 0 || mapCheck.x >= CHUNK_SIZE_X ||
-            mapCheck.y < 0 || mapCheck.y >= CHUNK_SIZE_Y ||
-            mapCheck.z < 0 || mapCheck.z >= CHUNK_SIZE_Z) {
-            return (RaycastHit){ .hit = FALSE };
+            rayLength1D.z += delta[2];
+        }else{
+            isInRadius = FALSE;
         }
 
         // Get block at position
         int index = (mapCheck.y * CHUNK_SIZE_X * CHUNK_SIZE_Z) + (mapCheck.z * CHUNK_SIZE_X) + mapCheck.x;
-    
-        if (chunk->blockTypeArr[index] != 0) {
+
+        if (staticWorldGetBlock((i4[3]){mapCheck.x,mapCheck.y,mapCheck.z}) != 0) {
+            // Determine which face was hit
+            enum Face hitFace = -1; // Default face is none
+            IVec3 adjacentPos = {mapCheck.x, mapCheck.y, mapCheck.z};
+            if (rayLength1D.x < rayLength1D.y && rayLength1D.x < rayLength1D.z) {
+                // X-axis face
+                hitFace = (step.x > 0) ? RIGHT : LEFT;
+                if(step.x > 0){
+                    adjacentPos.x += 1;
+                }else{
+                    adjacentPos.x -= 1;
+                }
+            } else if (rayLength1D.y < rayLength1D.z) {
+                // Y-axis face
+                hitFace = (step.y > 0) ? TOP : BOTTOM;
+                if(step.y > 0){
+                    adjacentPos.y += 1;
+                }else{
+                    adjacentPos.y -= 1;
+                }
+            } else {
+                // Z-axis face
+                hitFace = (step.z > 0) ? FRONT : BACK;
+                if(step.z > 0){
+                    adjacentPos.z += 1;
+                }else{
+                    adjacentPos.z -= 1;
+                }
+            } 
             return (RaycastHit){
                 .hit = true,
                 .blockPos = mapCheck,
                 .index = index,
+                .adjacentPos = adjacentPos,
             };
         }
 
@@ -135,3 +156,5 @@ RaycastHit RaycastBlock(vec3 origin, vec3 direction,struct Chunk* chunk) {
 
     return (RaycastHit){ .hit = FALSE };
 }
+
+

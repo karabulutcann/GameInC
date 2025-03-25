@@ -1,5 +1,6 @@
 #include "world/chunk_generator.h"
 #include "core/dynamic_array.h"
+#include <memory.h>
 
 void chunkGeneratorCreate(struct ChunkGenerator *dest){
     for(int i = 0; i < TEMP_MESH_COUNT; i++){
@@ -16,6 +17,7 @@ struct TempMesh* chunkGeneratorGetTempMesh(struct ChunkGenerator *self){
         {
             self->tempMeshArr[i].isFree = FALSE;
             self->tempMeshArr[i].totalWritten = 0;
+            memset(self->tempMeshArr[i].mesh, 0, TEMP_MESH_SIZE);
             return (self->tempMeshArr + i);
             break;
         }
@@ -25,7 +27,7 @@ struct TempMesh* chunkGeneratorGetTempMesh(struct ChunkGenerator *self){
 
 Bool chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct World* world, i4 chunkPos[2]){
 
-    struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkPos);
+     struct Chunk *chunk = chunkTableGet(world->chunkTable, chunkPos);
     if (chunk == NULL)
     {
         return FALSE;
@@ -60,6 +62,7 @@ Bool chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct World* world
             }
         }
     }
+
     mat4 model = GLM_MAT4_IDENTITY_INIT;
     glm_translate(model, (vec3){chunkPos[0] * cubeSize * CHUNK_SIZE_X, 0.0f, chunkPos[1] * cubeSize * CHUNK_SIZE_Z});
 

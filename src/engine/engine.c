@@ -12,7 +12,7 @@ float quadVertices[] = {
     1.0f, -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
 };
 
-#define sizeVertex 0.2f
+
 
 const float cubeHighlightVertices[] = {
     // Back face
@@ -82,6 +82,11 @@ GLfloat crosshairVertices[] = {
     -crosshairSize, -crosshairSize, 0.0f, // bottom left
 };
 
+const float debugGridVertices[] = {
+    0.0f,0.0f,0.0f,
+    0.0f,5.0f,0.0f,
+};
+
 static struct Engine *staticEngine;
 
 struct Engine *engineGet()
@@ -94,11 +99,14 @@ struct Engine *engineGet()
     return staticEngine;
 }
 
+const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
+
 struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDefferedRenderer *dest)
 {
-    shaderCreate("shaders/g_buffer_vertex.glsl", "shaders/g_buffer_fragment.glsl", NULL, &dest->geometryPass);
+    shaderCreate("shaders/depth_map.vert", "shaders/depth_map.frag", NULL, &dest->shadowPass);
+    shaderCreate("shaders/g_buffer.vert", "shaders/g_buffer.frag", NULL, &dest->geometryPass);
     shaderCreateTexture(&dest->geometryPass, "assets/textures/texture_atlas.png", "textureAtlas");
-    shaderCreate("shaders/deffered_vertex.glsl", "shaders/deffered_fragment.glsl", NULL, &dest->lightingPass);
+    shaderCreate("shaders/deffered.vert", "shaders/deffered.frag", NULL, &dest->lightingPass);
 
     dest->geometryPass.meshes = dynamicArrayCreate(DATA_TYPE_MESH, MAX_MESH_COUNT, sizeof(struct Mesh));
     dest->geometryPass.meshCount = MAX_MESH_COUNT;
@@ -106,9 +114,7 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
     {
         meshCreate(dest->geometryPass.uniformCount,
                    dest->geometryPass.uniforms,
-                   3, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0}, 
-                   {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = (GLvoid*)(sizeof(float) * 3)},
-                   {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = (GLvoid*)(sizeof(float) * 6)}},
+                   3, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0}, {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = (GLvoid *)(sizeof(float) * 3)}, {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = (GLvoid *)(sizeof(float) * 6)}},
                    dynamicArrayGet(dest->geometryPass.meshes, i));
     }
 
@@ -157,13 +163,31 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
         exit(1);
     }
 
+    glGenFramebuffers(1, &dest->depthMap);
+    glGenTextures(1, &dest->depthMapTexture);
+    glBindTexture(GL_TEXTURE_2D, dest->depthMapTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glBindFramebuffer(GL_FRAMEBUFFER, dest->depthMap);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dest->depthMapTexture, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    shaderSetInt(&dest->lightingPass, "shadowMap", 3);
+
     glCreateBuffers(1, &dest->quadVBO);
     glNamedBufferData(dest->quadVBO, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-    shaderBindBuffers(&dest->lightingPass, 2, 
-        (struct ShaderBufferBinding[]){
-            {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = 0},
-             {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = (GLvoid*)(sizeof(float) * 3)}},
+    shaderBindBuffers(&dest->lightingPass, 2,
+                      (struct ShaderBufferBinding[]){
+                          {.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = 0},
+                          {.valueCount = 2, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 5, .offset = (GLvoid *)(sizeof(float) * 3)}},
                       dest->quadVBO);
 
     return ok();
@@ -171,20 +195,77 @@ struct Result cubeDefferedRendererCreate(struct Engine engine, struct CubeDeffer
 
 struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4 projection, mat4 view)
 {
+    mat4 lightProjection = GLM_MAT4_IDENTITY_INIT;
+    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 100.0f, lightProjection);
+
+    mat4 lightView = GLM_MAT4_IDENTITY_INIT;
+    glm_lookat((vec3){-2.0f, 50.0f, -1.0f}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, lightView);
+
+    mat4 lightSpaceMatrix = GLM_MAT4_IDENTITY_INIT;
+    glm_mat4_mul(lightProjection, lightView, lightSpaceMatrix);
+
+    struct Mesh *mesh = NULL;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, self->depthMap);
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    shaderUse(&self->shadowPass);
+    shaderSetMat4(&self->shadowPass, "lightSpaceMatrix", lightSpaceMatrix);
+
+    for (index_t i = 0; i < self->geometryPass.meshCount; i++)
+    {
+        mesh = dynamicArrayGet(self->geometryPass.meshes, i);
+        if (mesh == NULL || !mesh->isInUse || mesh->vertexCount == 0)
+        {
+            continue;
+        }
+
+        if (!mesh->isCopied && !mesh->isLoading)
+        {
+            meshCopyData(mesh);
+        }
+
+        shaderBindBuffers(&self->shadowPass,
+                          1,
+                          (struct ShaderBufferBinding[]){
+                              {.valueCount = 3,
+                               .type = GL_FLOAT,
+                               .normalized = GL_FALSE,
+                               .stride = sizeof(float) * 8,
+                               .offset = 0}},
+                          mesh->vertexBuffer);
+
+        shaderBindUniforms(&self->shadowPass, mesh->uniformCount, mesh->uniforms);
+
+        if (mesh->isIndexed)
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferObject);
+            glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+        }
+        else
+        {
+            glDrawArrays(GL_TRIANGLES, 0, mesh->vertexCount);
+        }
+    }
+
+    // return ok();
+
     glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
+    glViewport(0, 0, staticEngine->window.width, staticEngine->window.height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaderPrepareForDraw(&self->geometryPass);
     shaderSetMat4(&self->geometryPass, "projection", projection);
     shaderSetMat4(&self->geometryPass, "view", view);
+    // glCullFace(GL_FRONT);
 
-    struct Mesh *mesh = NULL;
-    
     // geometry pass
     for (index_t i = 0; i < self->geometryPass.meshCount; i++)
     {
         mesh = dynamicArrayGet(self->geometryPass.meshes, i);
-        if(mesh == NULL || !mesh->isInUse || mesh->vertexCount == 0){
+        if (mesh == NULL || !mesh->isInUse || mesh->vertexCount == 0)
+        {
             continue;
         }
 
@@ -206,6 +287,7 @@ struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4
             glDrawArrays(GL_TRIANGLES, 0, mesh->vertexCount);
         }
     }
+    // glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -215,6 +297,7 @@ struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4
     glBindTextureUnit(0, self->position);
     glBindTextureUnit(1, self->normal);
     glBindTextureUnit(2, self->albedoSpec);
+    glBindTextureUnit(3, self->depthMapTexture);
 
     shaderSetVec3(&self->lightingPass, "viewPos", cameraGet()->position);
     shaderSetVec3(&self->lightingPass, "lights[0].Position", (vec3){-0.2f, -1.0f, -0.3f});
@@ -222,6 +305,8 @@ struct Result cubeDefferedRendererUpdate(struct CubeDefferedRenderer *self, mat4
     shaderSetFloat(&self->lightingPass, "lights[0].Linear", 0.7f);
     shaderSetFloat(&self->lightingPass, "lights[0].Quadratic", 1.8f);
     shaderSetInt(&self->lightingPass, "lights[0].type", 1);
+
+    shaderSetMat4(&self->lightingPass, "lightSpaceMatrix", lightSpaceMatrix);
 
     glBindVertexArray(self->lightingPass.vertexArrayObject);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -259,7 +344,7 @@ struct Result cubeDefferedRendererDestroy(struct CubeDefferedRenderer *self)
 
 struct Result cubeHighlightRendererCreate(struct Engine engine, struct CubeHighlightRenderer *dest)
 {
-    shaderCreate("shaders/highlight_vertex.glsl", "shaders/highlight_fragment.glsl", NULL, &dest->highlightPass);
+    shaderCreate("shaders/highlight.vert", "shaders/highlight.frag", NULL, &dest->highlightPass);
     glCreateBuffers(1, &dest->VBO);
     glCreateBuffers(1, &dest->EBO);
     glNamedBufferData(dest->EBO, sizeof(cubeHighlightIndices), cubeHighlightIndices, GL_STATIC_DRAW);
@@ -270,12 +355,12 @@ struct Result cubeHighlightRendererCreate(struct Engine engine, struct CubeHighl
     return ok();
 }
 
-struct Result cubeHighlightRendererUpdate(struct CubeHighlightRenderer *self, mat4 projection, mat4 view, i4 chunkPos[2], i4 blockPos[3])
+struct Result cubeHighlightRendererUpdate(struct CubeHighlightRenderer *self, mat4 projection, mat4 view, i4 chunkPos[2], i4 blockPos[3],vec3 color)
 {
-
     shaderUse(&self->highlightPass);
     shaderSetMat4(&self->highlightPass, "projection", projection);
     shaderSetMat4(&self->highlightPass, "view", view);
+    shaderSetVec3(&self->highlightPass,"color",color);
     mat4 model = GLM_MAT4_IDENTITY_INIT;
     glm_translate(model, (vec3){(chunkPos[0] * cubeSize * CHUNK_SIZE_X) + (blockPos[0] * cubeSize), (blockPos[1] * cubeSize), chunkPos[1] * cubeSize * CHUNK_SIZE_Z + (blockPos[2] * cubeSize)});
     shaderSetMat4(&self->highlightPass, "model", model);
@@ -362,6 +447,19 @@ struct Result engineCreate(struct Engine *dest)
         dest->crosshair.meshes[0].bindingCount,
         dest->crosshair.meshes[0].bufferBindings,
         dest->crosshair.meshes[0].vertexBuffer);
+
+    shaderCreate("shaders/debug.vert", "shaders/debug.frag", NULL, &dest->debugShader);
+    dest->debugShader.meshes = dynamicArrayCreate(DATA_TYPE_MESH, 1, sizeof(struct Mesh));
+    dest->debugShader.meshCount = 1;
+    meshCreate(
+        dest->debugShader.uniformCount,
+        dest->debugShader.uniforms, 1,
+        (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 8, .offset = 0}},
+        dynamicArrayGet(dest->debugShader.meshes, 0));
+    
+    glNamedBufferData(dest->debugShader.meshes[0].vertexBuffer, sizeof(cubeHighlightVertices), cubeHighlightVertices, GL_STATIC_DRAW);
+    shaderBindBuffers(&dest->debugShader, 1, (struct ShaderBufferBinding[]){{.valueCount = 3, .type = GL_FLOAT, .normalized = GL_FALSE, .stride = sizeof(float) * 3, .offset = 0}},
+    dest->debugShader.meshes[0].vertexBuffer);
 
     return ok();
 }
