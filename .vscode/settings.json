@@ -61,7 +61,11 @@
         "new": "c",
         "cstdlib": "c",
         "xlocinfo": "c",
-        "xlocale": "c"
+        "xlocale": "c",
+        "chrono": "c",
+        "filesystem": "c",
+        "forward_list": "c",
+        "time.h": "c"
     },
     "CodeGPT.apiKey": "Ollama"
 }

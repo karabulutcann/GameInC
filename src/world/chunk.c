@@ -46,13 +46,13 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 
     // Create a FastNoiseLite state
     fnl_state noise_state = fnlCreateState();
-    noise_state.seed = 12345;                  // You can change the seed for different terrain generation
+    noise_state.seed = random();                  // You can change the seed for different terrain generation
     noise_state.frequency = 0.009f;            // Adjust frequency for terrain detail
     noise_state.noise_type = FNL_NOISE_PERLIN; // You can experiment with different noise types
     noise_state.fractal_type = FNL_FRACTAL_FBM;
     // 4 den sonrası değişiklik yaratmıyo
-    noise_state.octaves = 4;
-    noise_state.gain = 0.4f;
+    noise_state.octaves = 5;
+    noise_state.gain = 0.3f;
 
     for (int x = 0; x < CHUNK_SIZE_X; x++)
     {
@@ -65,7 +65,7 @@ void chunkCreate(i4 chunkPos[2], struct Chunk *dest)
 
             // Sample noise to determine terrain height
             float height_sample = fnlGetNoise2D(&noise_state, world_x, world_z);
-            int terrain_height = 20 + (int)((height_sample * height_sample ) * 100);
+            int terrain_height = 20 + (int)((height_sample * height_sample ) * 200);
             for (int y = 0; y < CHUNK_SIZE_Y; y++)
             {
                 unsigned int block_id = 0; // Default: air

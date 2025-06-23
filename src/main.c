@@ -15,9 +15,7 @@
 #include <cglm/cglm.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#define WINDOW_WIDTH 1200
-#define WINDOW_HEIGHT 800
+#include <time.h>
 
 struct Camera camera;
 
@@ -33,7 +31,7 @@ int main()
     struct Boss boss = {0};
     bossCreate(&boss);
     bossHireWorker(&boss);
-    // bossHireWorker(&boss);
+    bossHireWorker(&boss);
 
     // TODO stack overflow oluyo arraylar cok buyuk tum buyuk arraylari heapden olustur
     struct Engine engine = {0};
@@ -87,6 +85,7 @@ int main()
 
     while (!windowShouldClose(&engine.window))
     {
+
         RaycastHit hit = {0};
         hit = RaycastBlock((vec3){camera.position[0], camera.position[1], camera.position[2]}, camera.front);
 
@@ -94,7 +93,7 @@ int main()
         {
             if (hit.hit)
             {
-                mDebug("hit to %d %d %d \n", hit.blockPos.x, hit.blockPos.y, hit.blockPos.z);
+                //FIXME chunk yenilendigi zaman kirilan block chunk sinirinda ise diger chunk yenilenmedigi icin bosluk gozukuyor
                 staticWorldSetBlock((i4[3]){hit.blockPos.x,hit.blockPos.y,hit.blockPos.z}, 0);
                 i4 *data = malloc(sizeof(i4[2]));
                 getChunkPos((i4[3]){hit.blockPos.x,hit.blockPos.y,hit.blockPos.z},data);
@@ -105,7 +104,6 @@ int main()
         
         if (isButtonClicked)
         {
-            mDebug("hit to %d %d %d\n", cursorPos[0], cursorPos[1], cursorPos[2]);
             staticWorldSetBlock(cursorPos, selectedBlock);
             i4 *data = malloc(sizeof(i4[2]));
             getChunkPos((i4[3]){hit.blockPos.x,hit.blockPos.y,hit.blockPos.z},data);
@@ -115,7 +113,7 @@ int main()
         }
 
         mat4 projection = GLM_MAT4_IDENTITY_INIT;
-        glm_perspective(glm_rad(45.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 300.0f, projection);
+        glm_perspective(glm_rad(50.0f), (float)engine.window.width / (float)engine.window.height, 0.1f, 3000.0f, projection);
 
         mat4 view = GLM_MAT4_IDENTITY_INIT;
         CACHE_RESULT(cameraLookAt(camera, view));

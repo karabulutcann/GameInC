@@ -13,9 +13,6 @@
 #include <nuklear/nuklear.h>
 #include <nuklear/nuklear_glfw_gl4.h>
 
-#define WINDOW_WIDTH 1200
-#define WINDOW_HEIGHT 800
-
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
@@ -48,7 +45,9 @@ void guiCreate(struct Engine *engine)
         // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/kenvector_future_thin.ttf", 13, 0);
         // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/ProggyClean.ttf", 16, 0);
         // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/ProggyTiny.ttf", 10, 0);
-        struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/Cousine-Regular.ttf", 13, 0);
+        // struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/Cousine-Regular.ttf", 13, 0);
+        struct nk_font *font = nk_font_atlas_add_from_file(atlas, "fonts/DepartureMonoNerdFont-Regular.otf", 16, 0);
+        
         nk_glfw3_font_stash_end();
         nk_style_load_all_cursors(staticGui.ctx, atlas->cursors);
         nk_style_set_font(staticGui.ctx, &font->handle);
@@ -59,19 +58,6 @@ void guiCreate(struct Engine *engine)
      * IF you need the GL resource id use: nk_glfw3_get_tex_ogl_id() */
 }
 
-// enum BlockType
-// {
-//     AIR,
-//     DIRT,
-//     STONE,
-//     GRASS,
-//     OAK_PLANK,
-//     OAK_LOG,
-//     CRAFTING_TABLE,
-//     STONE_BRICK,
-//     MOSSY_STONE_BRICK,
-//     CRACKED_STONE_BRICK,
-// };
 static const char *blocks[] = {
     "AIR",
     "DIRT",

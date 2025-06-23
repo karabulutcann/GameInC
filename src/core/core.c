@@ -1,7 +1,15 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <malloc.h>
+#include <stdlib.h>
 #include "core.h"
+#include <time.h>
+
+
+int random(){
+    srand(time(NULL) * time(NULL));
+    rand();
+}
 
 // Doğrudan kullanma bunun yerine format() kullan.
 // DisposableString kullanıldıktan sonra free()lemiyor kullanma

@@ -4,8 +4,6 @@
 
 #ifndef TEMP_MESH_DEFINE
 #define TEMP_MESH_DEFINE
-#define TEMP_MESH_COUNT 10
-
 #define TEMP_MESH_SIZE (CHUNK_SIZE_X * CHUNK_SIZE_Z * CHUNK_SIZE_Y * sizeof(f4) * CUBE_VERTEX_SIZE * 36)
 
 struct TempMesh{

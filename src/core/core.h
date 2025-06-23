@@ -2,6 +2,9 @@
 #include "safe_strings.h"
 #include <glad/glad.h>
 
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 720
+
 #define CHUNK_SIZE_X 16
 #define CHUNK_SIZE_Y 128
 #define CHUNK_SIZE_Z 16
@@ -13,6 +16,8 @@
 #define sizeVertex 0.2f
 
 #define cubeSize sizeVertex * 2
+
+#define TEMP_MESH_COUNT 3
 
 #define TRUE 1
 #define FALSE 0
@@ -78,6 +83,8 @@ typedef u8 index_t;
 typedef u8 size_t;
 #endif
 
+typedef u8 clockT;
+
 typedef u8 id_t;
 
 typedef GLuint GlFrameBuffer;
@@ -97,7 +104,7 @@ typedef GLuint GlVertexArray;
 
 #define WORLD_SIZE_X 10
 
-#define LOAD_DISTANCE 5
+#define LOAD_DISTANCE 20
 
 #define TOTAL_LOAD_COUNT (LOAD_DISTANCE * 2 + 1) * (LOAD_DISTANCE * 2 + 1)
 
@@ -116,3 +123,5 @@ enum BlockType
     MOSSY_STONE_BRICK,
     CRACKED_STONE_BRICK,
 };
+
+int random();

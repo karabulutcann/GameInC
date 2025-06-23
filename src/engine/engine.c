@@ -384,7 +384,7 @@ struct Result cubeHighlightRendererDestroy(struct CubeHighlightRenderer *self)
 struct Result engineCreate(struct Engine *dest)
 {
     staticEngine = dest;
-    windowCreate(1280, 720, "Engine", &dest->window);
+    windowCreate(WINDOW_WIDTH, WINDOW_HEIGHT, "Engine", &dest->window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {

@@ -36,7 +36,7 @@ Bool chunkGeneratorGenerateMesh(struct ChunkGenerator *self, struct World* world
     struct TempMesh *tempMesh = chunkGeneratorGetTempMesh(self);
     if(tempMesh == NULL)
     {
-        mDebug("ChunkGenerator: No free temp meshes");
+        // mDebug("ChunkGenerator: No free temp meshes");
         return FALSE;
     }
 

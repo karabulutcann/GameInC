@@ -69,7 +69,9 @@ struct Result fileRead(const char *path, char **buffer)
     return ok();
 }
 
-// struct Result fileWrite(const char *path, char *buffer){
+
+// struct Result fileWrite(const char *path, char *buffer)
+// {
 // 	if(!path || !buffer)
 // 	{
 // 		return mErr("Invalid arguments");
@@ -78,14 +80,14 @@ struct Result fileRead(const char *path, char **buffer)
 //     FILE *fp = fopen(path, "wb");
 //     if (!fp || ferror(fp)) {
 //         return mErr(format("Error opening file: %s\n", path));
-//     }
+//     }		
 
-//     size n = fwrite(buffer, 1, strlen(buffer), fp);
+// 	mDebug("Wrote file: %s\n", path);
+
+//     size_t n = fwrite(buffer, 1, strlen(buffer), fp);
 //     if (n != strlen(buffer)) {
 //         return mErr(format("Error writing file: %s\n", path));
 //     }
-
-// 	DEBUG("Wrote file: %s\n", path);
 
 //     fclose(fp);
 //     return ok();

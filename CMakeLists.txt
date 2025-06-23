@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(TestApp C)
+project(app C)
 
 # Set C standard
 set(CMAKE_C_STANDARD 11)

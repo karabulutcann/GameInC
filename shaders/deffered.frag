@@ -74,8 +74,9 @@ void main()
             diffuse *= attenuation;
             specular *= attenuation;
         }
-        float shadow = ShadowCalculation(lightSpaceMatrix * vec4(FragPos, 1.0));
-        lighting += (1.0 - shadow) * (diffuse + specular);        
+        // float shadow = ShadowCalculation(lightSpaceMatrix * vec4(FragPos, 1.0));
+        // lighting += (1.0 - shadow) * (diffuse + specular);     
+        lighting += (diffuse + specular);        
     }
     FragColor = vec4(lighting , 1.0);
 }

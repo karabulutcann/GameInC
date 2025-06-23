@@ -28,8 +28,8 @@ struct Result _cameraCreateDefault(struct Camera* dest){
     
     return _cameraCreate(
         (struct CameraCreateOptions){
-            .position = {2.0f, 0.8f, 2.0f}, 
-            .front = {0.0f, 0.0f, -1.0f},
+            .position = {2.0f, 50.0f, 2.0f}, 
+            .front = {-8.0f, 0.0f, -1.0f},
             .up = {0.0f, 1.0f, 0.0f},
             .yaw = 90.0f,
             .pitch = 0.0f,

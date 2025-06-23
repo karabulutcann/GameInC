@@ -4,9 +4,7 @@
 DWORD __stdcall _threadFunction(LPVOID lpParam)
 {
     struct ThreadData *threadData = (struct ThreadData *)lpParam;
-    {
-        threadData->func(threadData->data);
-    }
+    threadData->func(threadData->data);
 }
 
 struct Result threadManagerCreate(struct ThreadManager *dest)
@@ -15,12 +13,12 @@ struct Result threadManagerCreate(struct ThreadManager *dest)
     return ok();
 }
 
-struct Result threadManagerSpawnThread(struct ThreadManager *self, void *data, ThreadFunction threadFunction)
+struct Result threadManagerSpawnThread(struct ThreadManager *self, void *data, ThreadFunctionT threadFunction)
 {
     struct ThreadState *threadState = self->threadStates + self->threadCount;
 
     // Initialize thread state
-    threadState->threadId = self->threadCount + 1;
+    threadState->threadId = self->threadCount;
     threadState->eventHandle = CreateEvent(
         NULL,  // Default security attributes
         TRUE,  // Manual reset event
@@ -114,23 +112,3 @@ struct Result threadManagerDestroy(struct ThreadManager *self)
     }
     return ok();
 }
-
-// void ErrorHandler(LPCSTR message)
-// {
-//     DWORD errorCode = GetLastError();
-//     LPSTR errorMessage = NULL;
-
-//     FormatMessageA(
-//         FORMAT_MESSAGE_ALLOCATE_BUFFER |
-//             FORMAT_MESSAGE_FROM_SYSTEM |
-//             FORMAT_MESSAGE_IGNORE_INSERTS,
-//         NULL,
-//         errorCode,
-//         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-//         (LPSTR)&errorMessage,
-//         0,
-//         NULL);
-
-//     printf("%s: %s\n", message, errorMessage);
-//     LocalFree(errorMessage);
-// }
