@@ -10,6 +10,10 @@ Tüm özellikleri tam olarak desteklemese de, aşağıdaki temel işlevleri içe
 
 Bu özellikler basit düzeyde çalışmaktadır ve öğrenim amacıyla geliştirilmiştir.
 
+## Platform Desteği
+
+> ⚠️ Şu anda proje **yalnızca Windows üzerinde çalışmaktadır**.
+
 ---
 
 ## Kurulum Talimatları
@@ -45,3 +49,4 @@ cd build
 cmake ..
 cmake --build .
 ```
+
