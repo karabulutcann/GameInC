@@ -15,3 +15,4 @@ compile_commands.json
 
 uv.lock
 
+.DS_STORE
