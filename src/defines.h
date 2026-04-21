@@ -1,0 +1,9 @@
+#pragma once
+#define RENDER_DISTANCE 5
+#define MAX_CHUNK_TO_RENDER RENDER_DISTANCE*2 * RENDER_DISTANCE*2
+
+#define CHUNK_SIZE_X 16
+#define CHUNK_SIZE_Y 128
+#define CHUNK_SIZE_Z 16
+
+#define BLOCK(x,y,z) (x + (z*CHUNK_SIZE_X) + (y*CHUNK_SIZE_X*CHUNK_SIZE_Z))
