@@ -1,5 +1,5 @@
 struct Game{
-
+    struct World world;
 };
 
 void gameSetup(struct Game* dest);

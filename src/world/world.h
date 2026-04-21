@@ -2,20 +2,12 @@
 #include "core/core.h"
 #include "world/chunk.h"
 #include "FastNoiseLight/FastNoiseLite.h"
-
-enum Face
-{
-    BACK,
-    FRONT,
-    LEFT,
-    RIGHT,
-    BOTTOM,
-    TOP
-};
+#include "world/chunk-map.h"
 
 struct World
 {
-    ChunkTable chunkTable;
+    struct ChunkMap chunkMap;
+    i32 seed;
 };
 
 struct World *worldGet();

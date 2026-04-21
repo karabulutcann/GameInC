@@ -1,44 +1,38 @@
 #include "file.h"
 #include <stdio.h>
-#include <malloc.h>
-#include "core.h"
-#include "result.h"
-#include "log.h"
+#include <stdlib.h>
+#include "assert.h"
+#include "core/types.h"
 
 #define READ_CHUNK_SIZE 1024
 
-struct Result fileRead(const char *path, char **buffer)
+void fileRead(const char *path, char **buffer)
 {
-    if(!path || !buffer)
-    {
-        return mErr("Invalid arguments");
-    }
+    ASSERT(path && buffer, "Invalid arguments");
 
 	*buffer = NULL;
-	
+
 	FILE *fp = fopen(path, "rb");
-	if (!fp || ferror(fp)) {
-        return mErr(format("Error opening file: %s\n", path));
-	}
+	ASSERT(fp && !ferror(fp), "Error opening file: %s\n", path);
 
 	char *tmp;
 	size_t used = 0;
 	size_t size = 0;
 	size_t n;
 
-	while (TRUE) {
+	while (true) {
 		if (used + READ_CHUNK_SIZE + 1 > size) {
 			size = used + READ_CHUNK_SIZE + 1;
 
 			if (size <= used) {
 				free(*buffer);
-				return mErr(format("File too large: %s\n", path));
+				PANIC("File too large: %s\n", path);
 			}
 
 			tmp = realloc(  *buffer, size);
 			if (!tmp) {
 				free(*buffer);
-				return mErr(format("Memory allocation failed: %s\n", path));
+				PANIC("Memory allocation failed: %s\n", path);
 			}
             *buffer = tmp;
 		}
@@ -52,21 +46,18 @@ struct Result fileRead(const char *path, char **buffer)
 
 	if (ferror(fp)) {
 		free(*buffer);
-		return mErr(format("Error reading file: %s\n", path));
+		PANIC("Error reading file: %s\n", path);
 	}
 
 	tmp = realloc(*buffer, used + 1);
 	if (!tmp) {
 		free(*buffer);
-        return mErr(format("Memory allocation failed: %s\n", path));
+		PANIC("Memory allocation failed: %s\n", path);
 	}
     *buffer = tmp;
     (*buffer)[used] = 0;
 
-	mDebug("Read file: %s\n", path);
-
     fclose(fp);
-    return ok();
 }
 
 
@@ -76,11 +67,11 @@ struct Result fileRead(const char *path, char **buffer)
 // 	{
 // 		return mErr("Invalid arguments");
 // 	}
-	
+
 //     FILE *fp = fopen(path, "wb");
 //     if (!fp || ferror(fp)) {
 //         return mErr(format("Error opening file: %s\n", path));
-//     }		
+//     }
 
 // 	mDebug("Wrote file: %s\n", path);
 

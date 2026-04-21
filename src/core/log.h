@@ -1,43 +1,28 @@
 #pragma once
-#include "safe_strings.h"
-#define DEBUG_ENABLED
+#include <stdio.h>
 
-#define COLOR_RESET 0
-#define COLOR_ERROR 1
-#define COLOR_INFO 2
-#define COLOR_DEBUG 6
-#define COLOR_WARN 3
+// ANSI Color Codes
+#define CLR_RESET  "\x1b[0m"
+#define CLR_RED    "\x1b[31m"
+#define CLR_GREEN  "\x1b[32m"
+#define CLR_YELLOW "\x1b[33m"
+#define CLR_BLUE   "\x1b[34m"
+#define CLR_MAGENTA "\x1b[35m"
+#define CLR_CYAN   "\x1b[36m"
 
+// The core logging engine with color support
+#define LOG(color, level_str, fmt, ...) \
+    fprintf(stdout, color "[" level_str "] " fmt CLR_RESET "  func: %s  %s:%d\n", \
+            ##__VA_ARGS__, __func__, __FILE__, __LINE__)
 
-// bu calismiyor 
-#define mCglmPrint(var) _Generic((var), \
-    float[3]: print_vec3,            \
-    float[4]: print_vec4,            \
-    float[4][4]: print_mat4)(var)
+// INFO (Cyan)
+#define INFO(fmt, ...) \
+    do { LOG(CLR_CYAN, "INFO", fmt, ##__VA_ARGS__); } while(0)
 
-struct DisposableString print_vec3(float v[3]);
+// WARN (Yellow)
+#define WARN(fmt, ...) \
+    do { LOG(CLR_YELLOW, "WARN", fmt, ##__VA_ARGS__); } while(0)
 
-struct DisposableString print_vec4(float(v)[4]);
-
-struct DisposableString print_mat4(float(m)[4][4]);
-
-#define mPrintFormatted(formattedString)               \
-    {                                                  \
-        struct DisposableString tmp = formattedString; \
-        mUseDisposableString(tmp)                      \
-        {                                              \
-            printf("%s", tmp.string);      \
-        }                                              \
-    }
-
-#define mInfo(...) _log("INFO", COLOR_INFO, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define mError(...) _log("ERROR", COLOR_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define mWarn(...) _log("WARN", COLOR_WARN, __FILE__, __LINE__, __func__, __VA_ARGS__)
-
-#ifdef DEBUG_ENABLED
-#define mDebug(...) _log("DEBUG", COLOR_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#else
-#define mDebug(...)
-#endif
-
-void _log(const char *level, short unsigned int color, const char *file, int line, const char *func, const char *format, ...);
+// ERROR (Red)
+#define ERROR(fmt, ...) \
+    do { LOG(CLR_RED, "ERROR", fmt, ##__VA_ARGS__); } while(0)

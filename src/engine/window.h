@@ -1,53 +1,26 @@
 #pragma once
-#include "core/core.h"
-
-#define USE_GLFW
-
-#ifdef USE_GLFW
-#include <GLFW/glfw3.h>
-#endif
+#include "core/types.h"
+#include "GLFW/glfw3.h"
 
 struct Window
 {
     int width;
     int height;
-    char *title;
-    Bool isMouseLocked;
+    const char *title;
     GLFWwindow *windowHandle;
+    bool shouldClose;
 };
-enum InputKey
-{
-    KEY_W,
-    KEY_S,
-    KEY_A,
-    KEY_D,
-    KEY_SPACE,
-    KEY_ESC,
-    KEY_LEFT_SHIFT,
-    MOUSE_LEFT,
-    MOUSE_RIGHT,
-};
-#define KEY_DOWN TRUE
-#define KEY_UP FALSE
 
-struct Result windowCreate(int width, int height, const char *title, struct Window *dest);
+void windowCreate(int width, int height, const char *title, struct Window *dest);
 
-void windowToggleMouseLock(struct Window * window);
+void windowToggleMouseLock(struct Window * self);
 
-Bool windowShouldClose(struct Window *window);
+bool windowShouldClose(struct Window *self);
 
-void windowSetShouldClose(struct Window *window, Bool shouldClose);
+void windowSetShouldClose(struct Window *self, bool shouldClose);
 
-Bool windowGetKey(struct Window *window, enum InputKey key);
+void windowPollEvents(struct Window *self);
 
-f4 windowGetMouseX(struct Window* window);
+void windowSwapBuffers(struct Window *self);
 
-f4 windowGetMouseY(struct Window* window);
-
-struct Result windowUpdateEvents(struct Window *window);
-
-struct Result windowSwapBuffers(struct Window *window);
-
-f4 windowGetDeltaTime(struct Window* window);
-
-struct Result windowDestroy(struct Window *window);
+void windowDestroy();
