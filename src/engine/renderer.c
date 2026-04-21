@@ -23,8 +23,21 @@ struct ChunkMesh {
   GLsizei indexCount;
 };
 
-void chunkMeshCreate(){
+void chunkMeshCreate(f32* mesh,countT meshLength,struct ChunkMesh* dest){
+    ASSERT(mesh != NULL && dest != NULL, "Invalid arguments");
 
+    glGenVertexArrays(1,&dest->vao);
+    glGenBuffers(1,&dest->vbo);
+    // glGenBuffers(1,&dest->ebo);
+
+    glBindVertexArray(dest->vao);
+    glBindBuffer(GL_ARRAY_BUFFER,dest->vbo);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(f32) * meshLength,mesh,GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(f32) * 3,(void*)0);
+
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+    glBindVertexArray(0);
 }
 
 struct ChunkPipeline {
