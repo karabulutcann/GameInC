@@ -1,46 +1,30 @@
 #pragma once
-#include "core/result.h"
 #include "engine/window.h"
-#include "engine/shader.h"
+#include "engine/renderer.h"
+#include <cglm/cglm.h>
+#include <math.h>
 
-struct CubeDefferedRenderer {
-    struct Shader geometryPass;
-    struct Shader lightingPass;
-    struct Shader shadowPass;
-    GlFrameBuffer fbo;
-    GlRenderBuffer depthBuffer;
-    GlTexture position;
-    GlTexture normal;
-    GlTexture albedoSpec;
-    GlFrameBuffer depthMap;
-    GlTexture depthMapTexture;
-    GlVertexBuffer quadVBO;
-};
-
-struct CubeHighlightRenderer {
-    struct Shader highlightPass;
-    GlVertexBuffer VBO;
-    GlIndexBuffer EBO;
-};
-
-struct Result cubeHighlightRendererUpdate(struct CubeHighlightRenderer *self, mat4 projection, mat4 view, i4 chunkPos[2] ,i4 blockPos[3],vec3 color);
-
-struct Engine{
+struct Engine {
     struct Window window;
-    struct CubeDefferedRenderer cubeDefferedRenderer;
-    struct CubeHighlightRenderer cubeHighlightRenderer;
-    struct Shader crosshair;
-    struct Shader debugShader;
-    f4 deltaTime;
-    f4 lastFrame;
+    int input;
+    struct Renderer renderer;
+    int resourse;
 };
 
-struct Engine *engineGet();
+void engineSetup(struct Engine* dest);
 
-struct Result engineCreate(struct Engine * dest);
+void engineBeginUpdate(struct Engine* self);
+void engineEndUpdate();
 
-struct Result engineUpdate(struct Engine * self, mat4 projection, mat4 view);
+void engineShutdown(struct Engine *self);
 
-struct Result engineDraw(struct Engine * self);
+struct Input{};
 
-struct Result engineDestroy(struct Engine * self);
+void inputSetup();
+void inputShutdown();
+
+struct Physic{};
+
+void physicSetup();
+void physicShutdown();
+void physicsUpdate();

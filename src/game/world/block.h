@@ -1,6 +1,5 @@
 #include "core/assert.h"
 #include "core/types.h"
-#include <cstddef>
 #include <stdlib.h>
 
 #define BLOCK_SIZE 0.2f
@@ -54,10 +53,10 @@ const f32 CUBE_VERTICES[] = {
     -BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, // bottom-left
 };
 
-void blockBuildMesh(f32* mesh,sizeT* totalWritten){
+void blockBuildMesh(f32* mesh,sizeT* totalWritten,i16 blockPos[3]){
     ASSERT(mesh != NULL && totalWritten != NULL,"Invalid parameters");
-    for(indexT i=0;i<sizeof(CUBE_VERTICES);i++){
-        mesh[i] = CUBE_VERTICES[i];
-        totalWritten += sizeof(CUBE_VERTICES[0]);
+    for(indexT i=0;i<sizeof(CUBE_VERTICES) / sizeof(f32);i++){
+        mesh[i] = CUBE_VERTICES[i] + blockPos[i % 3];
+        *totalWritten += sizeof(CUBE_VERTICES[0]);
     }
 }

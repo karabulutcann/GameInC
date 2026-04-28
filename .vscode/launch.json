@@ -28,11 +28,22 @@
             "name": "linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/test",
+            "program": "${workspaceFolder}/build/app",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/bin/",
+            "cwd": "${workspaceFolder}/build/",
             "environment": [],
+        },
+        {
+            "name": "macos",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/app",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/",
+            "env": {},
+            "sourceMap": { ".": "${workspaceFolder}" }
         }
     ]
 }

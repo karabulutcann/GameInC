@@ -18,11 +18,19 @@ include_directories("include" "src")
 # Add executable
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${GLAD_FILE})
 
-# Link directories
-target_link_directories(${PROJECT_NAME} PRIVATE lib/GLFW)
-
 # Link libraries
-target_link_libraries(${PROJECT_NAME} glfw3_mt)
+if(APPLE)
+    target_link_directories(${PROJECT_NAME} PRIVATE lib/GLFW/lib-arm64)
+    target_link_libraries(${PROJECT_NAME} glfw3
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreFoundation"
+        "-framework OpenGL"
+    )
+else()
+    target_link_directories(${PROJECT_NAME} PRIVATE lib/GLFW)
+    target_link_libraries(${PROJECT_NAME} glfw3_mt)
+endif()
 
 # Define debug flags
 target_compile_definitions(${PROJECT_NAME} PRIVATE _DEBUG)

@@ -1,5 +1,6 @@
 #pragma once
 #include "core/types.h"
+#include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
 struct Window
