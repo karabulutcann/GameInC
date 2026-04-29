@@ -72,7 +72,7 @@ void chunkBuildMesh(struct Chunk *self,struct ChunkPipeline* chunkPipeline) {
     }
   }
   ASSERT(totalWritten % sizeof(f32) == 0,"TotalWritten should be a multiply of f32");
-  chunkPipelineCreateChunkMesh(chunkPipeline, tempMesh, totalWritten / sizeof(f32),&self->chunkMeshIndex);
+  chunkPipelineCreateChunkMesh(chunkPipeline, tempMesh, totalWritten,&self->chunkMeshIndex);
   free(tempMesh);
 }
 
